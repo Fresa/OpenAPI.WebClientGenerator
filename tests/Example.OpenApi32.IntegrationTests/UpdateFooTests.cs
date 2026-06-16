@@ -1,3 +1,5 @@
+using System.Net;
+using System.Text;
 using AwesomeAssertions;
 using Corvus.Json;
 using Example.Foo.Components.Schemas;
@@ -33,6 +35,44 @@ public class UpdateFooTests(FooApplicationFactory app) : FooTestSpecification, I
         anyApplicationResponse.Headers.Status.Should().Be(new JsonInteger(2));
     }
 
+    [Fact]
+    public async Task UpdatingFoo_WithInvalidResponseObjects_ProducesValidationResult()
+    {
+        using var httpClient = new HttpClient(new StubHandler(_ =>
+        {
+            var response = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent("""{ "Name": 1 }""", Encoding.UTF8, "application/json"),
+            };
+            response.Headers.TryAddWithoutValidation("Status", "not-an-integer&test");
+            return response;
+        }));
+        httpClient.BaseAddress = new Uri("https://localhost");
+
+        var client = new Foo.Foo(httpClient);
+        var result = await client.Foo_(1)
+            .PutAsync(
+                content: new Foo.Foo.Foo1.Content.ApplicationJson(
+                    FooProperties.Create(name: "test")),
+                header: new Foo.Foo.Foo1.Header
+                {
+                    Bar = new JsonString("foo")
+                },
+                cancellation: CancellationToken);
+
+        result.FailedRequestValidation.Should().BeFalse();
+        result.IsSuccessful.Should().BeFalse();
+
+        result.ValidationResults.Should().HaveCount(2);
+        result.ValidationResults.Should().AllSatisfy(validationResult => validationResult.Valid.Should().BeFalse());
+        var schemaLocations = result.ValidationResults.Select(validationResult =>
+            validationResult.Location?.SchemaLocation).ToList();
+        schemaLocations.Should().ContainEquivalentOf(new JsonReference("#/paths/~1foo~1{FooId}/put/responses/200/headers/Status/schema/type"));
+        schemaLocations.Should().ContainEquivalentOf(new JsonReference("#/components/schemas/FooProperties/properties/Name/type"));
+
+        result.Response.Should().BeOfType<Foo.Foo.Foo1.PutResponse.OK200.AnyApplication>();
+    }
+    
     //
     // [Fact]
     // public async Task Given_unauthenticated_request_When_Updating_Foo_It_Should_Return_401()
@@ -73,4 +113,11 @@ public class UpdateFooTests(FooApplicationFactory app) : FooTestSpecification, I
     //
     //     result.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     // }
+
+    private sealed class StubHandler(Func<HttpRequestMessage, HttpResponseMessage> respond) : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request, CancellationToken cancellationToken) =>
+            Task.FromResult(respond(request));
+    }
 }
