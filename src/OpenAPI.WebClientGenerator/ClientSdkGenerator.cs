@@ -75,7 +75,8 @@ public sealed class WebClientGenerator : IIncrementalGenerator
         var httpResponseMessageExtensionsGenerator =
             new HttpResponseMessageExtensionsGenerator(openApiVersion, rootNamespace);
         httpResponseMessageExtensionsGenerator.GenerateClass().AddTo(context);
-
+        new BindResultGenerator(rootNamespace).GenerateClass().AddTo(context);
+        
         var requestBuilderGenerator = new RequestBuilderGenerator(openApiVersion);
         requestBuilderGenerator.Generate(rootNamespace).AddTo(context);
         var clientGenerator = new ClientGenerator(sdkConfiguration.ClientName, rootNamespace);

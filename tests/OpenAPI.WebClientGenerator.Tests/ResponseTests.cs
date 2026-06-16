@@ -886,20 +886,7 @@ internal partial class TestClient
                             protected OK200(HttpResponseMessage response)
                             {
                                 StatusCode = response.StatusCode;
-                                Headers = new ResponseHeaders
-                                {
-                                    Location = response.Bind<Corvus.Json.JsonString>(
-                                        """
-                                        {
-                                          "name": "Location",
-                                          "in": "header",
-                                          "required": true,
-                                          "schema": {
-                                            "type": "string"
-                                          }
-                                        } 
-                                        """)
-                                };
+                                Headers = ResponseHeaders.Bind(response);
                             }
             
                             internal static bool MatchesStatusCode(HttpStatusCode statusCode) =>
@@ -920,7 +907,34 @@ internal partial class TestClient
                             /// </summary> 
                             internal sealed class ResponseHeaders 
                             {
-                                internal required Corvus.Json.JsonString Location { get; init; }
+                                private readonly BindResult<Corvus.Json.JsonString> _location;
+
+                                private ResponseHeaders(HttpResponseMessage response)
+                                {
+                                    _location = response.Bind<Corvus.Json.JsonString>(
+                                        """
+                                        {
+                                          "name": "Location",
+                                          "in": "header",
+                                          "required": true,
+                                          "schema": {
+                                            "type": "string"
+                                          }
+                                        } 
+                                        """);
+                                }
+
+                                internal static ResponseHeaders Bind(HttpResponseMessage response) =>
+                                    new ResponseHeaders(response);
+
+                                internal Corvus.Json.JsonString Location => _location.Value;
+
+                                internal ValidationContext Validate(ValidationContext validationContext,
+                                    ValidationLevel validationLevel)
+                                {
+                                    validationContext = _location.Validate("#/paths/~1foo/get/responses/200/headers/Location/schema", true, validationContext, validationLevel);
+                                    return validationContext;
+                                }
                             }
             
                             /// <summary>
@@ -946,7 +960,7 @@ internal partial class TestClient
                             internal override ValidationContext Validate(ValidationLevel validationLevel)
                             {
                                 var validationContext = CreateValidationContext();
-                                validationContext = Headers.Location.Validate("#/paths/~1foo/get/responses/200/headers/Location/schema", true, validationContext, validationLevel);
+                                validationContext = Headers.Validate(validationContext, validationLevel);
                                 return validationContext;
                             }
                         }

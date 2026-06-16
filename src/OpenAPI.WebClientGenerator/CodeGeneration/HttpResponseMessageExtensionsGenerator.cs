@@ -9,18 +9,6 @@ internal sealed class HttpResponseMessageExtensionsGenerator(
 {
     private const string ClassName = "HttpResponseMessageExtensions";
 
-    internal string CreateBindParameterInvocation(
-        string requestVariableName, 
-        string bindingTypeName,
-        IOpenApiParameter parameter) =>
-        $""""
-         {@namespace}.{ClassName}.Bind<{bindingTypeName}>(
-         {requestVariableName},
-         """
-         {parameter.Serialize(openApiVersion)}
-         """)
-         """";
-    
     internal SourceCode GenerateClass() =>
         new($"{ClassName}.g.cs",
         $$$""""
@@ -58,8 +46,8 @@ internal sealed class HttpResponseMessageExtensionsGenerator(
             /// <param name="response">Response message to bind from</param>
             /// <param name="parameterSpecificationAsJson">OpenAPI parameter specification formatted as json</param>
             /// <typeparam name="T">The type to bind</typeparam>
-            /// <returns>The bound instance</returns>
-            internal static T Bind<T>(this HttpResponseMessage response, 
+            /// <returns>The bind result of the parameter</returns>
+            internal static BindResult<T> Bind<T>(this HttpResponseMessage response, 
                 string parameterSpecificationAsJson)
                 where T : struct, IJsonValue<T>
             {
@@ -67,33 +55,41 @@ internal sealed class HttpResponseMessageExtensionsGenerator(
                 return parameter switch
                 {
                     _ when TryParse<T>(response, parameter, out var value) => value.Value,
-                    _ => T.Undefined
+                    _ => new BindResult<T>(T.Undefined)
                 };
             }
            
-            private static bool TryParse<T>(this HttpResponseMessage response, IParameter parameter, [NotNullWhen(true)] out T? value) 
-                where T : struct, IJsonValue<T> =>
+            private static bool TryParse<T>(this HttpResponseMessage response, 
+                IParameter parameter, 
+                [NotNullWhen(true)] out BindResult<T>? value) 
+                    where T : struct, IJsonValue<T> =>
                 parameter switch
                 {
                     _ when parameter.InHeader => TryParseHeader<T>(response.Headers, parameter, out value),
                     _ => throw new InvalidOperationException($"Parameter {parameter.Name} has an unknown location")
                 };
 
-            private static bool TryParseHeader<T>(HttpResponseHeaders headers, IParameter parameter, [NotNullWhen(true)] out T? value)
-                where T : struct, IJsonValue<T>
+            private static bool TryParseHeader<T>(HttpResponseHeaders headers, 
+                IParameter parameter, 
+                [NotNullWhen(true)] out BindResult<T>? value)
+                    where T : struct, IJsonValue<T>
             {
-                value = default;
-                return headers.TryGetValues(parameter.Name, out var values) &&
-                       TryParse<T>(values.ToArray(), parameter, out value);
+                if (headers.TryGetValues(parameter.Name, out var values))
+                {
+                    value = Parse<T>(values.ToArray(), parameter);
+                    return true;
+                } 
+                value = null;
+                return false;
             }
 
-            private static bool TryParse<T>(string[] values, IParameter parameter, [NotNullWhen(true)] out T? value)
+            private static BindResult<T> Parse<T>(string[] values, 
+                IParameter parameter)
                 where T : struct, IJsonValue<T>
             {
                 if (values.Length == 0)
                 {
-                    value = default;
-                    return false;
+                    return new BindResult<T>(default(T));
                 }
                 
                 var parser = GetParser(parameter);
@@ -102,19 +98,20 @@ internal sealed class HttpResponseMessageExtensionsGenerator(
                         ? values.Select(value => $"{parameter.Name}={value}") 
                         : values);
                 
-                value = Parse<T>(parser, stringValue);
-                return true;
+                return Parse<T>(parser, stringValue);
             }
             
-            private static T Parse<T>(IParameterValueParser parser, string? value)
+            private static BindResult<T> Parse<T>(IParameterValueParser parser, string? value)
                 where T : struct, IJsonValue<T>
             {
                 if (!parser.TryParse(value, out var instance, out var error))
                 {
-                    return T.Parse(error);
+                    return new BindResult<T>(error);
                 }
             
-                return instance == null ? T.Null : T.Parse(instance.ToJsonString());
+                return new BindResult<T>(instance == null ? 
+                    T.Null : 
+                    T.Parse(instance.ToJsonString()));
             }
         }
         #nullable restore

@@ -13,15 +13,19 @@ internal sealed class ResponseHeaderGenerator(
     OpenApiSpecVersion openApiSpecVersion)
 {
     private readonly string _propertyName = name.ToPascalCase();
-    private readonly string _requiredDirective = header.Required ? "required " : string.Empty;
+    private readonly string _fieldName = $"_{name.ToCamelCase()}";
     private readonly string _fullyQualifiedTypeIdentifier = typeDeclaration.FullyQualifiedDotnetTypeName();
     private readonly string _nullableTypeAnnotation = header.Required ? "" : "?";
 
     internal string GenerateProperty() =>
         $$"""
           {{header.Description.AsComment("summary", "para")}}
-          internal {{_requiredDirective}}{{_fullyQualifiedTypeIdentifier}}{{_nullableTypeAnnotation}} {{_propertyName}} { get; init; }
+          internal {{_fullyQualifiedTypeIdentifier}}{{_nullableTypeAnnotation}} {{_propertyName}} => {{_fieldName}}.Value{{(header.Required ? "" : ".AsOptional()")}};
           """.TrimStart();
+    internal string GenerateField() =>
+        $$"""
+              private readonly BindResult<{{_fullyQualifiedTypeIdentifier}}> {{_fieldName}};
+              """.TrimStart();
     
     internal string GenerateBindDirective(string responseVariableName)
     {
@@ -36,15 +40,15 @@ internal sealed class ResponseHeaderGenerator(
 
         return
             $""""
-             {_propertyName} = {responseVariableName}.Bind<{_fullyQualifiedTypeIdentifier}>(
+             {_fieldName} = {responseVariableName}.Bind<{_fullyQualifiedTypeIdentifier}>(
                  """
                  {headerSpecificationAsJson.Indent(4).TrimStart()}
-                 """){(header.Required ? "" : ".AsOptional()")},
+                 """);
              """";
     }
 
     internal string GenerateValidateDirective() =>
         $"""
-         {_propertyName}{_nullableTypeAnnotation}.Validate("{typeDeclaration.RelativeSchemaLocation}", {header.Required.ToString().ToLowerInvariant()}, validationContext, validationLevel){(header.Required ? "" : " ?? validationContext")};
+         {_fieldName}.Validate("{typeDeclaration.RelativeSchemaLocation}", {header.Required.ToString().ToLowerInvariant()}, validationContext, validationLevel);
          """;
 }

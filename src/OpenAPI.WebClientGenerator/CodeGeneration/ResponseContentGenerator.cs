@@ -103,11 +103,7 @@ internal abstract partial class {{ClassName}} : {{baseClassName}}
         StatusCode = response.StatusCode;{{(_anyHeaders ? 
 $$"""
 
-        Headers = new ResponseHeaders
-        {{{
-            _headerGenerators.AggregateToString(generator =>
-                generator.GenerateBindDirective("response")).TrimEnd(',').Indent(12)}}
-        };
+        Headers = ResponseHeaders.Bind(response);
 """ : "")}}
     }
 
@@ -132,7 +128,29 @@ $$"""
     internal sealed class ResponseHeaders 
     {{{
         _headerGenerators.AggregateToString(generator =>
-            generator.GenerateProperty()).Indent(8)}}
+            generator.GenerateField()).Indent(8)}}
+
+        private ResponseHeaders(HttpResponseMessage response)
+        {{{
+            _headerGenerators.AggregateToString(generator =>
+                generator.GenerateBindDirective("response")).Indent(12)}}
+        }
+
+        internal static ResponseHeaders Bind(HttpResponseMessage response) =>
+            new ResponseHeaders(response);
+        {{_headerGenerators.AggregateToString(generator => 
+                generator.GenerateProperty())
+            .Indent(8)}}
+            
+        internal ValidationContext Validate(ValidationContext validationContext,
+            ValidationLevel validationLevel)
+        {{{
+            _headerGenerators.AggregateToString(generator =>
+$"""
+            validationContext = {generator.GenerateValidateDirective()}
+""")}}
+            return validationContext;
+        }
     }
 
 """ : "")}}
@@ -172,11 +190,11 @@ $"""
     /// <inheritdoc/>
     internal override ValidationContext Validate(ValidationLevel validationLevel)
     {
-        var validationContext = CreateValidationContext();{{
-        _headerGenerators.AggregateToString(generator =>
-$"""
-        validationContext = Headers.{generator.GenerateValidateDirective()}
-""")}}
+        var validationContext = CreateValidationContext();{{(_anyHeaders ? 
+"""
+
+        validationContext = Headers.Validate(validationContext, validationLevel);
+""" : "")}}
         return validationContext;
     }
 }
