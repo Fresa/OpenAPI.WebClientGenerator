@@ -20,7 +20,7 @@ using System.Text.Json.Nodes;
 
 namespace {{@namespace}};
 
-internal sealed class RequestBuilder(HttpClient httpClient, WebClientConfiguration configuration)
+internal sealed partial class RequestBuilder(HttpClient httpClient, WebClientConfiguration configuration)
 {
     private static readonly ConcurrentDictionary<string, IParameterValueParser> ParserCache = new();
     private const string ParameterValueParserVersion = "{{openApiSpecVersion.GetParameterVersion()}}";
@@ -54,7 +54,12 @@ internal sealed class RequestBuilder(HttpClient httpClient, WebClientConfigurati
             return;
         _queryParameters[name] = () => Serialize(nonNullableValue, parameterSpecificationAsJson);
     }
-    
+
+    internal void AddQuery(string key, string value)
+    {
+        _queryParameters[key] = () => value;
+    }
+
     private readonly Dictionary<string, Func<string?>> _headerParameters = new();
     internal void AddHeader<T>(
         string name,
@@ -71,7 +76,12 @@ internal sealed class RequestBuilder(HttpClient httpClient, WebClientConfigurati
             return;
         _headerParameters[name] = () => Serialize(nonNullableValue, parameterSpecificationAsJson);
     }
-    
+
+    internal void AddHeader(string key, string value)
+    {
+        _headerParameters[key] = () => value;
+    }
+
     private MediaTypeWithQualityHeaderValue[] _acceptMediaTypes = [];
     internal void AcceptMediaTypes(MediaTypeWithQualityHeaderValue[] mediaTypes)
     {

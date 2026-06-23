@@ -85,7 +85,7 @@ public sealed class WebClientGenerator : IIncrementalGenerator
         var schemaGenerator = SchemaGenerator.For(
             openApiSpecification, rootNamespace, context);
 
-        var authGenerator = new AuthGenerator(openApi);
+        var authGenerator = new SecurityGenerator(openApi);
         authGenerator.GenerateSecuritySchemeClass(rootNamespace)?.AddTo(context);
         
         var openApiVisitor = OpenApiVisitor.ForSpecification(openApiSpecification);
@@ -185,11 +185,14 @@ public sealed class WebClientGenerator : IIncrementalGenerator
                 
                 var responseGenerator = new ResponseGenerator(
                     responseBodyGenerators);
-                
+
+                var operationParameters = operationParameterGenerators.Values.ToArray();
+                authGenerator.TryGetAuthenticationGenerator(operation, operationParameters, out var authenticationGenerator);
                 var operationGenerator = new OperationGenerator(
-                    operationParameterGenerators.Values.ToArray(),
+                    operationParameters,
                     requestBodyGenerator,
-                    responseGenerator);
+                    responseGenerator,
+                    authenticationGenerator);
                 methodGenerator.AddOperation(openApiOperation.Key, operationGenerator);
             }
         }

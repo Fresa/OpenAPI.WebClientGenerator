@@ -1,28 +1,29 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.OpenApi;
 using OpenAPI.WebClientGenerator.Extensions;
 
 namespace OpenAPI.WebClientGenerator.CodeGeneration;
 
-internal sealed class AuthGenerator
+internal sealed class SecurityGenerator
 {
     private readonly IDictionary<string, IOpenApiSecurityScheme> _securitySchemes;
     private readonly Dictionary<string, List<string>>[] _topLevelSecuritySchemeGroups;
-
+    private readonly SecuritySchemaTranslations _securitySchemaTranslations;
+    
     private readonly ConcurrentDictionary<string, HashSet<(OpenApiOperation Operation, ParameterGenerator? Parameter)>> _securitySchemeParameters = new();
 
-    public AuthGenerator(OpenApiDocument openApiDocument)
+    public SecurityGenerator(OpenApiDocument openApiDocument)
     {
         _securitySchemes = openApiDocument.Components?.SecuritySchemes ??
                            new Dictionary<string, IOpenApiSecurityScheme>();
-        _topLevelSecuritySchemeGroups = GetSecuritySchemeGroups(openApiDocument.Security) ?? [];
-        HasSecuritySchemes = _securitySchemes.Any();
+        _securitySchemaTranslations = new SecuritySchemaTranslations(openApiDocument);
+        _topLevelSecuritySchemeGroups = _securitySchemaTranslations.GetSecuritySchemeGroups(openApiDocument.Security) ?? [];
     }
 
-    internal bool HasSecuritySchemes { get; }
     internal SourceCode? GenerateSecuritySchemeClass(string @namespace)
     {
         if (!_securitySchemes.Any())
@@ -141,23 +142,12 @@ $"""
 }
 """;
     
-    private Dictionary<string, List<string>>[]? GetSecuritySchemeGroups(IList<OpenApiSecurityRequirement>? securityRequirements) =>
-        securityRequirements?
-            .Select(requirement =>
-                requirement.ToDictionary(
-                    pair => GetSecuritySchemeName(pair.Key), 
-                    pair => pair.Value))
-            .ToArray();
-    private string GetSecuritySchemeName(OpenApiSecuritySchemeReference reference)
-        => _securitySchemes.First(pair => pair.Value == reference.Target).Key;
-
-    
-    private Dictionary<OpenApiSecuritySchemeReference, ParameterGenerator> GetSecuritySchemeParameters(OpenApiOperation operation, ParameterGenerator[] parameters)
+    private Dictionary<OpenApiSecuritySchemeReference, ParameterGenerator?> GetSecuritySchemes(OpenApiOperation operation, ParameterGenerator[] parameters)
     {
         var nullableSecuritySchemeParameters =
             operation.Security?
                 .SelectMany(requirement =>
-                    requirement.Where(pair => pair.Key.In != null && pair.Key.Name != null)
+                    requirement
                         .Select(pair => pair.Key))
                 .Distinct()
                 .Select(reference => (Scheme: reference,
@@ -167,7 +157,7 @@ $"""
         
         foreach (var (scheme, parameter) in nullableSecuritySchemeParameters)
         {
-            _securitySchemeParameters.AddOrUpdate(GetSecuritySchemeName(scheme),
+            _securitySchemeParameters.AddOrUpdate(_securitySchemaTranslations.GetSecuritySchemeName(scheme),
                 _ => [(operation, parameter)],
                 (_, list) =>
                 {
@@ -177,31 +167,25 @@ $"""
         }
 
         return nullableSecuritySchemeParameters
-            .Where(pair => pair.Parameter != null)
-            .ToDictionary(pair => pair.Scheme, pair => pair.Parameter!);
+            .ToDictionary(pair => pair.Scheme, pair => pair.Parameter);
     }
     
-    internal string GenerateAuthParameters(OpenApiOperation operation, ParameterGenerator[] parameters,
-        out bool requiresAuth)
+    internal bool TryGetAuthenticationGenerator(
+        OpenApiOperation operation, 
+        ParameterGenerator[] parameters,
+        [NotNullWhen(true)] out AuthenticationGenerator? authenticationGenerator)
     {
         var securityRequirementGroups =
-            GetSecuritySchemeGroups(operation.Security) ?? _topLevelSecuritySchemeGroups;
-        requiresAuth = securityRequirementGroups.Any();
+            _securitySchemaTranslations.GetSecuritySchemeGroups(operation.Security) ?? _topLevelSecuritySchemeGroups;
+        var requiresAuth = securityRequirementGroups.Any();
         if (!requiresAuth)
         {
-            return string.Empty;
+            authenticationGenerator = null;
+            return false;
         }
 
-        var securitySchemeParameters = GetSecuritySchemeParameters(operation, parameters);
-        var hasSecuritySchemeParameters = securitySchemeParameters.Any();
-        return (hasSecuritySchemeParameters ? 
-$$"""
-/// todo: add parameters and make sure those parameters are not generated in any of the other input structures
-
-""" :   
-$$"""
-
-/// todo: add inferred auth parameters
-""");
+        var securitySchemes = GetSecuritySchemes(operation, parameters);
+        authenticationGenerator = new AuthenticationGenerator(securitySchemes, _securitySchemaTranslations);
+        return true;
     }
 }
