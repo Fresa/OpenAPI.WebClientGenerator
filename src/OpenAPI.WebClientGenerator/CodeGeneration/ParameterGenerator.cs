@@ -22,4 +22,8 @@ internal sealed class ParameterGenerator(
     internal string SchemaLocation { get; } = typeDeclaration.RelativeSchemaLocation;
 
     internal string ParameterSpecificationAsJson { get; } = parameter.Serialize(openApiSpecVersion).ToString();
+    
+    internal bool IsSecuritySchemeParameter(IOpenApiSecurityScheme scheme) =>
+        scheme.In == parameter.In &&
+        scheme.Name == parameter.Name;
 }
