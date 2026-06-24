@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using OpenAPI.WebClientGenerator.Extensions;
 
 namespace OpenAPI.WebClientGenerator.CodeGeneration;
@@ -103,13 +105,8 @@ internal partial class {{className}}(RequestBuilder requestBuilder, WebClientCon
 {{{methodGenerator.Operations.AggregateToString(operation => 
 $$"""
     internal async Task<Result<{{GetResponseTypeName(operation.Key)}}>> {{operation.Key.Method.ToLower().ToPascalCase()}}Async({{
-            AddContentParameter(new ParametersGenerator []
-            {
-                operation.Value.QueryGenerator,
-                operation.Value.HeadersGenerator
-            }.OrderBy(generator => generator.IsOptional)
-            .Select(GetParameterArgumentExpression)
-            .AggregateToString(), operation.Value.RequestBodyGenerator)
+        GetParameterArgumentExpressions(operation.Value)
+            .AggregateToString()
             .Indent(8)
             .TrimStart()
         }}{{(operation.Value.ResponseGenerator.GeneratesContent ? 
@@ -131,7 +128,11 @@ $"""
 """
 
         requestBuilder.AcceptMediaTypes(accepts?.MediaTypes ?? []);
-""" : "")}}
+""" : "")}}{{(operation.Value.AuthenticationGenerator is null ? "" : 
+"""
+
+        authentication.AddTo(requestBuilder);
+""")}}
         if (!requestBuilder.ValidationContext.IsValid)
             return Result<{{GetResponseTypeName(operation.Key)}}>.WithInvalidRequest(requestBuilder.ValidationContext.Results
                 .WithLocation(configuration.OpenApiSpecificationUri));
@@ -174,7 +175,8 @@ $$"""
     { 
         operation.Value.RequestBodyGenerator.GenerateClass(),
         operation.Value.QueryGenerator.GenerateClass(), 
-        operation.Value.HeadersGenerator.GenerateClass()
+        operation.Value.HeadersGenerator.GenerateClass(),
+        operation.Value.AuthenticationGenerator?.GenerateClass() ?? string.Empty
     }
     .AggregateToString()
     .Trim()
@@ -192,6 +194,8 @@ $$"""
 #nullable restore
 """;
     }
+
+    
 
     private static string GetMethodParameterList(MethodGenerator methodGenerator) =>
         methodGenerator.Parameters.AggregateToString(parameter =>
@@ -217,21 +221,31 @@ $$"""
         return $"{parametersGenerator.ClassName}{terny} {parametersGenerator.ClassName.ToCamelCase()}{defaultExpression},"; 
     }
 
-    private static string AddContentParameter(string parameters, RequestBodyGenerator bodyGenerator)
+    private static IEnumerable<string> GetParameterArgumentExpressions(
+        OperationGenerator operationGenerator)
     {
-        if (!bodyGenerator.HasBody)
-            return parameters;
-        return bodyGenerator.IsRequired
-            ? $"""
-               Content content,
-               {parameters}
-               """.TrimEnd()
-            : $"""
-               {parameters}
-               Content? content = null,
-               """.TrimStart();
-    }
+        var expressions = new ParametersGenerator[]
+            {
+                operationGenerator.QueryGenerator,
+                operationGenerator.HeadersGenerator
+            }.OrderBy(generator => generator.IsOptional)
+            .Select(GetParameterArgumentExpression);
+        
+        if (operationGenerator.RequestBodyGenerator.HasBody)
+        {
+            expressions = operationGenerator.RequestBodyGenerator.IsRequired
+                ? expressions.Prepend("Content content,")
+                : expressions.Append("Content? content = null,");
+        }
 
+        if (operationGenerator.AuthenticationGenerator is not null)
+        {
+            expressions = expressions.Prepend("Authentication authentication,");
+        }
+
+        return expressions;
+    }
+    
     private static string GetContentExpression(RequestBodyGenerator bodyGenerator)
     {
         if (!bodyGenerator.HasBody)

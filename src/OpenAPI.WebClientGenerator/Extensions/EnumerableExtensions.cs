@@ -30,7 +30,7 @@ internal static class EnumerableExtensions
                 builder.AppendLine(convert(item)))
             .ToString();
     
-    internal static IEnumerable<(T item, int i)> WithIndex<T>(this IEnumerable<T> items) =>
+    internal static IEnumerable<(T Item, int I)> WithIndex<T>(this IEnumerable<T> items) =>
         items.Select((arg1, i) => (arg1, i));
 
     internal static IEnumerable<string> RemoveEmptyLines(this IEnumerable<string> list) =>

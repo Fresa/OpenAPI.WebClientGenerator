@@ -1,63 +1,51 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.OpenApi;
+using Microsoft.OpenApi.MicrosoftExtensions;
 using OpenAPI.WebClientGenerator.Extensions;
 
 namespace OpenAPI.WebClientGenerator.CodeGeneration;
 
-internal sealed class AuthenticationGenerator(Dictionary<OpenApiSecuritySchemeReference, ParameterGenerator?> securitySchemes, SecuritySchemaTranslations securitySchemaTranslations)
+internal sealed class AuthenticationGenerator(Dictionary<OpenApiSecuritySchemeReference, (ParameterGenerator Parameters, List<string> Scopes)>[] securityRequirementObjects, SecuritySchemaTranslations securitySchemaTranslations)
 {
     internal string GenerateClass() =>
 $$"""
-internal sealed partial class Authentication
-{
-    private readonly System.Action<RequestBuilder> _apply;
-
-    private Authentication(System.Action<RequestBuilder> apply) => _apply = apply;
-    {{securitySchemes.AggregateToString(scheme =>
-    {
-      var schemeReference = scheme.Key;
-      var schemeClassName = securitySchemaTranslations.GetSecuritySchemeName(schemeReference).ToPascalCase();
-      var comment = schemeReference.Description;
-      if (schemeReference.Type == SecuritySchemeType.MutualTLS)
-      {
-          comment += "\n" + "Mutual TLS needs to be configured on the HttpClient handler's client certificate";
-      }
-
-      return
+internal abstract partial class Authentication
+{{{securityRequirementObjects.WithIndex().AggregateToString(securityRequirementObject  =>
 $$"""
-{{comment.AsComment("summary", "para").Indent(4)}}
-{{scheme.Key.Type switch
-{
-    SecuritySchemeType.ApiKey =>
-$"""
-    internal static Authentication {schemeClassName}(string apiKey) =>
-        new(requestBuilder => requestBuilder.Add{schemeReference.In?.GetDisplayName().ToPascalCase()}(SecuritySchemes.{schemeClassName}.Name, apiKey));
- """,
-    SecuritySchemeType.Http when string.Equals(schemeReference.Scheme, "basic", StringComparison.OrdinalIgnoreCase) =>
+    internal sealed partial class Requirement{{securityRequirementObject.I}} : Authentication
+    {{{securityRequirementObject.Item.AggregateToString(securityRequirement => 
+        {
+            var schemeReference = securityRequirement.Key;
+            var parameters = securityRequirement.Value.Parameters;
+            var scopes = securityRequirement.Value.Scopes;
+            var schemeClassName = securitySchemaTranslations.GetSecuritySchemeName(schemeReference).ToPascalCase();
+            var comment = schemeReference.Description;
+            if (schemeReference.Type == SecuritySchemeType.MutualTLS)
+            {
+              comment += "\n" + "Mutual TLS needs to be configured on the HttpClient handler's client certificate";
+            }
+            return
 $$"""
-    internal static Authentication {{schemeClassName}}(string username, string password) =>
-        new(requestBuilder => requestBuilder.AddHeader("Authorization", $"Basic {System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes($"{username}:{password}"))}"));
-  """,
-    _ when schemeReference.Type is SecuritySchemeType.OAuth2 or SecuritySchemeType.OpenIdConnect
-           || string.Equals(schemeReference.Scheme, "bearer", StringComparison.OrdinalIgnoreCase) =>
-$$"""
-    internal static Authentication {{schemeClassName}}(string token) =>
-        new(requestBuilder => requestBuilder.AddHeader("Authorization", $"Bearer {token}"));
-""",
-    SecuritySchemeType.MutualTLS =>
-$$"""
-    internal static Authentication {{schemeClassName}}() =>
-        new(_ => { });
-""",
-    _ => 
-$$"""
-    internal static partial Authentication {{schemeClassName}}(System.Action<RequestBuilder> action);
-"""
-}}}
+{{comment.AsComment("summary", "para").Indent(8)}}
+        internal required SecuritySchemes.{{schemeClassName}} {{schemeClassName}} { init; get; }
 """;
-})}}
-    internal void AddTo(RequestBuilder requestBuilder) => _apply(requestBuilder);
+        })}}
+        
+        internal void AddTo(RequestBuilder requestBuilder)
+        {{{securityRequirementObject.Item.AggregateToString(securityRequirement => 
+        {
+            var schemeReference = securityRequirement.Key;
+            var schemeClassName = securitySchemaTranslations.GetSecuritySchemeName(schemeReference).ToPascalCase();
+            return
+$$"""
+            {{schemeClassName}}.AddTo(requestBuilder);
+""";
+        })}}
+        }
+    }
+""")}}
 }
 """;
 }

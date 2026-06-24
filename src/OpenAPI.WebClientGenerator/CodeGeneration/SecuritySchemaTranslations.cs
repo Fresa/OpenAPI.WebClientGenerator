@@ -12,11 +12,11 @@ internal sealed class SecuritySchemaTranslations(OpenApiDocument openApiDocument
     internal string GetSecuritySchemeName(OpenApiSecuritySchemeReference reference)
         => _securitySchemes.First(pair => pair.Value == reference.Target).Key;
     
-    internal Dictionary<string, List<string>>[]? GetSecuritySchemeGroups(IList<OpenApiSecurityRequirement>? securityRequirements) =>
+    internal Dictionary<OpenApiSecuritySchemeReference, List<string>>[]? GetSecuritySchemeGroups(IList<OpenApiSecurityRequirement>? securityRequirements) =>
         securityRequirements?
             .Select(requirement =>
                 requirement.ToDictionary(
-                    pair => GetSecuritySchemeName(pair.Key), 
+                    pair => pair.Key, 
                     pair => pair.Value))
             .ToArray();
 }
