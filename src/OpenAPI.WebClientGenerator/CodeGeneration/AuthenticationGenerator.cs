@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.OpenApi;
-using Microsoft.OpenApi.MicrosoftExtensions;
 using OpenAPI.WebClientGenerator.Extensions;
 
 namespace OpenAPI.WebClientGenerator.CodeGeneration;
@@ -12,10 +10,10 @@ internal sealed class AuthenticationGenerator(Dictionary<OpenApiSecuritySchemeRe
     internal string GenerateClass() =>
 $$"""
 internal abstract partial class Authentication
-{{{securityRequirementObjects.WithIndex().AggregateToString(securityRequirementObject  =>
+{{{securityRequirementObjects.AggregateToString(securityRequirementObject  =>
 $$"""
-    internal sealed partial class Requirement{{securityRequirementObject.I}} : Authentication
-    {{{securityRequirementObject.Item.AggregateToString(securityRequirement => 
+    internal sealed partial class {{GetAuthenticationClassName(securityRequirementObject)}} : Authentication
+    {{{securityRequirementObject.AggregateToString(securityRequirement => 
         {
             var schemeReference = securityRequirement.Key;
             var parameters = securityRequirement.Value.Parameters;
@@ -34,7 +32,7 @@ $$"""
         })}}
         
         internal void AddTo(RequestBuilder requestBuilder)
-        {{{securityRequirementObject.Item.AggregateToString(securityRequirement => 
+        {{{securityRequirementObject.AggregateToString(securityRequirement => 
         {
             var schemeReference = securityRequirement.Key;
             var schemeClassName = securitySchemaTranslations.GetSecuritySchemeName(schemeReference).ToPascalCase();
@@ -48,4 +46,23 @@ $$"""
 """)}}
 }
 """;
+
+    private readonly HashSet<string> _requirementGroupNames = [];
+    private string GetAuthenticationClassName(
+        Dictionary<OpenApiSecuritySchemeReference, (ParameterGenerator Parameters, List<string> Scopes)>
+            securityRequirementObject)
+    {
+        var name = 
+            string.Join("And", securityRequirementObject.Keys
+                .Select(reference => securitySchemaTranslations.GetSecuritySchemeName(reference).ToPascalCase())
+                .OrderBy(name => name));
+        var i = 1;
+        while (!_requirementGroupNames.Add(name))
+        {
+            i++;
+            name += i;
+        }
+
+        return name;
+    }
 }
