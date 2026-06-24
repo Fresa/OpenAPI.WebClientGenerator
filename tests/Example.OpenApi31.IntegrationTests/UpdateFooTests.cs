@@ -15,10 +15,7 @@ public class UpdateFooTests(FooApplicationFactory app) : FooTestSpecification, I
         var client = new Foo.Foo(httpClient);
         var result = await client.Foo_(1)
             .PutAsync(
-                authentication: new Foo.Foo.Foo1.Authentication.Requirement0
-                {
-                    PetstoreAuth = new Foo.SecuritySchemes.PetstoreAuth(OIDCAuthHttpHandler.GetJwt("update"))
-                }, 
+                authentication: new Foo.Foo.Foo1.Authentication.PetstoreAuth(OIDCAuthHttpHandler.GetJwt("update")), 
                 content: new Foo.Foo.Foo1.Content.ApplicationJson(
                     FooProperties.Create(name: "test")),
                 header: new Foo.Foo.Foo1.Header

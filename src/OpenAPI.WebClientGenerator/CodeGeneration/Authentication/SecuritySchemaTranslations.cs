@@ -2,7 +2,7 @@
 using System.Linq;
 using Microsoft.OpenApi;
 
-namespace OpenAPI.WebClientGenerator.CodeGeneration;
+namespace OpenAPI.WebClientGenerator.CodeGeneration.Authentication;
 
 internal sealed class SecuritySchemaTranslations(OpenApiDocument openApiDocument)
 {

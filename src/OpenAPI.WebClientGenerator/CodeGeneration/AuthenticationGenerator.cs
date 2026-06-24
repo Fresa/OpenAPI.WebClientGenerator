@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.OpenApi;
+using OpenAPI.WebClientGenerator.CodeGeneration.Authentication;
 using OpenAPI.WebClientGenerator.Extensions;
 
 namespace OpenAPI.WebClientGenerator.CodeGeneration;
@@ -10,32 +11,55 @@ internal sealed class AuthenticationGenerator(Dictionary<OpenApiSecuritySchemeRe
     internal string GenerateClass() =>
 $$"""
 internal abstract partial class Authentication
-{{{securityRequirementObjects.AggregateToString(securityRequirementObject  =>
+{{{securityRequirementObjects.AggregateToString(securityRequirementObject =>
+    securityRequirementObject.Count == 1
+        ? GenerateSingleSchemeRequirement(securityRequirementObject)
+        : GenerateMultiSchemeRequirement(securityRequirementObject))}}
+    internal abstract void AddTo(RequestBuilder requestBuilder);  
+}
+""";
+
+    private string GenerateSingleSchemeRequirement(
+        Dictionary<OpenApiSecuritySchemeReference, (ParameterGenerator Parameters, List<string> Scopes)> securityRequirementObject)
+    {
+        var className = GetAuthenticationClassName(securityRequirementObject);
+        var schemeReference = securityRequirementObject.Single().Key;
+        var schemeClassName = securitySchemaTranslations.GetSecuritySchemeName(schemeReference).ToPascalCase();
+        var constructorArguments = OpenApiSecuritySchemeExtensions.GetSchemeConstructorArguments(schemeReference);
+        return
 $$"""
-    internal sealed partial class {{GetAuthenticationClassName(securityRequirementObject)}} : Authentication
-    {{{securityRequirementObject.AggregateToString(securityRequirement => 
+    internal sealed partial class {{className}} : Authentication
+    {
+        private readonly SecuritySchemes.{{schemeClassName}} _scheme;
+
+        internal {{className}}({{constructorArguments.GetMethodParameterList()}}) =>
+            _scheme = new SecuritySchemes.{{schemeClassName}}({{constructorArguments.GetMethodArgumentList()}});
+
+        internal override void AddTo(RequestBuilder requestBuilder) => _scheme.AddTo(requestBuilder);
+    }
+""";
+    }
+
+    private string GenerateMultiSchemeRequirement(
+        Dictionary<OpenApiSecuritySchemeReference, (ParameterGenerator Parameters, List<string> Scopes)> securityRequirementObject)
+    {
+        var className = GetAuthenticationClassName(securityRequirementObject);
+        return
+$$"""
+    internal sealed partial class {{className}} : Authentication
+    {{{securityRequirementObject.AggregateToString(securityRequirement =>
         {
-            var schemeReference = securityRequirement.Key;
-            var parameters = securityRequirement.Value.Parameters;
-            var scopes = securityRequirement.Value.Scopes;
-            var schemeClassName = securitySchemaTranslations.GetSecuritySchemeName(schemeReference).ToPascalCase();
-            var comment = schemeReference.Description;
-            if (schemeReference.Type == SecuritySchemeType.MutualTLS)
-            {
-              comment += "\n" + "Mutual TLS needs to be configured on the HttpClient handler's client certificate";
-            }
+            var schemeClassName = securitySchemaTranslations.GetSecuritySchemeName(securityRequirement.Key).ToPascalCase();
             return
 $$"""
-{{comment.AsComment("summary", "para").Indent(8)}}
         internal required SecuritySchemes.{{schemeClassName}} {{schemeClassName}} { init; get; }
 """;
         })}}
-        
-        internal void AddTo(RequestBuilder requestBuilder)
-        {{{securityRequirementObject.AggregateToString(securityRequirement => 
+
+        internal override void AddTo(RequestBuilder requestBuilder)
+        {{{securityRequirementObject.AggregateToString(securityRequirement =>
         {
-            var schemeReference = securityRequirement.Key;
-            var schemeClassName = securitySchemaTranslations.GetSecuritySchemeName(schemeReference).ToPascalCase();
+            var schemeClassName = securitySchemaTranslations.GetSecuritySchemeName(securityRequirement.Key).ToPascalCase();
             return
 $$"""
             {{schemeClassName}}.AddTo(requestBuilder);
@@ -43,9 +67,8 @@ $$"""
         })}}
         }
     }
-""")}}
-}
 """;
+    }
 
     private readonly HashSet<string> _requirementGroupNames = [];
     private string GetAuthenticationClassName(

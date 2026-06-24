@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.OpenApi;
+using OpenAPI.WebClientGenerator.CodeGeneration.Authentication;
 using OpenAPI.WebClientGenerator.Extensions;
 
 namespace OpenAPI.WebClientGenerator.CodeGeneration;
@@ -42,7 +43,8 @@ internal static class SecuritySchemes
         var schemeName = pair.Key;
         var className = schemeName.ToPascalCase();
         var scheme = pair.Value;
-        return scheme.Type == null ? string.Empty : 
+        var constructorParameters = scheme.GetSchemeConstructorArguments().GetMethodParameterList();
+        return scheme.Type == null ? string.Empty :
 $$"""
 
     internal const string {{className}}Key = "{{pair.Key}}";
@@ -54,29 +56,29 @@ $$"""
 {
     SecuritySchemeType.ApiKey =>
 $"""
-        internal {className}(string apiKey) =>
-            _apply = requestBuilder => requestBuilder.Add{scheme.In?.GetDisplayName().ToPascalCase()}(Name, apiKey);
+        internal {className}({constructorParameters}) =>
+            _apply = requestBuilder => requestBuilder.Add{scheme.In?.GetDisplayName().ToPascalCase()}(Name, {SecurityScheme.ApiKey.Key.Name});
 """,
     SecuritySchemeType.Http when string.Equals(scheme.Scheme, "basic", StringComparison.OrdinalIgnoreCase) =>
 $$"""
-        internal {{className}}(string username, string password) =>
-            _apply = requestBuilder => requestBuilder.AddHeader("Authorization", $"Basic {System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes($"{username}:{password}"))}");
+        internal {{className}}({{constructorParameters}}) =>
+            _apply = requestBuilder => requestBuilder.AddHeader("Authorization", $"Basic {System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes($"{{{SecurityScheme.Http.Username.Name}}}:{{{SecurityScheme.Http.Password.Name}}}"))}");
 """,
     _ when scheme.Type is SecuritySchemeType.OAuth2 or SecuritySchemeType.OpenIdConnect
            || string.Equals(scheme.Scheme, "bearer", StringComparison.OrdinalIgnoreCase) =>
 $$"""
-        internal {{className}}(string token) =>
-            _apply = requestBuilder => requestBuilder.AddHeader("Authorization", $"Bearer {token}");
+        internal {{className}}({{constructorParameters}}) =>
+            _apply = requestBuilder => requestBuilder.AddHeader("Authorization", $"Bearer {{{SecurityScheme.Bearer.Token.Name}}}");
 """,
     SecuritySchemeType.MutualTLS =>
 $$"""
-        internal {{className}}() =>
+        internal {{className}}({{constructorParameters}}) =>
             _apply = _ => { };
 """,
     _ =>
 $$"""
-        internal {{className}}(System.Action<RequestBuilder> apply) =>
-            _apply = apply;
+        internal {{className}}({{constructorParameters}}) =>
+            _apply = {{SecurityScheme.Custom.Apply}};
 """
 }}}
 

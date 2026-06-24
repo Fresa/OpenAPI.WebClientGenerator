@@ -10,12 +10,13 @@ public class UpdateFooTests(FooApplicationFactory app) : FooTestSpecification, I
     [Fact]
     public async Task When_Updating_Foo_It_Should_Return_Updated_Foo()
     {
-        using var httpClient = app.CreateClient()
-            .WithOAuth2ImplicitFlowAuthentication("update");;
+        using var httpClient = app.CreateClient();
 
         var client = new Foo.Foo(httpClient);
         var result = await client.Foo_(1)
             .PutAsync(
+                authentication: new Foo.Foo.Foo1.Authentication.PetstoreAuth(
+                    OIDCAuthHttpHandler.GetJwt("update")), 
                 content: new Foo.Foo.Foo1.Content.ApplicationJson(
                     FooProperties.Create(name: "test")),
                 header: new Foo.Foo.Foo1.Header
