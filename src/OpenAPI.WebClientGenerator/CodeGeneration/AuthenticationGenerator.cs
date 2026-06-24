@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.OpenApi;
 using OpenAPI.WebClientGenerator.CodeGeneration.Authentication;
@@ -8,7 +8,16 @@ namespace OpenAPI.WebClientGenerator.CodeGeneration;
 
 internal sealed class AuthenticationGenerator(Dictionary<OpenApiSecuritySchemeReference, (ParameterGenerator Parameters, List<string> Scopes)>[] securityRequirementObjects, SecuritySchemaTranslations securitySchemaTranslations)
 {
-    internal string GenerateClass() =>
+    internal SourceCode Generate(string @namespace, IReadOnlyList<string> nestingClassNames) =>
+        new($"{string.Join(".", nestingClassNames)}.Authentication.g.cs",
+$$"""
+#nullable enable
+namespace {{@namespace}};
+{{NestedClassGenerator.Wrap(nestingClassNames, GenerateClass)}}
+#nullable restore
+""");
+
+    private string GenerateClass() =>
 $$"""
 internal abstract partial class Authentication
 {{{securityRequirementObjects.AggregateToString(securityRequirementObject =>
@@ -25,7 +34,7 @@ internal abstract partial class Authentication
         var className = GetAuthenticationClassName(securityRequirementObject);
         var schemeReference = securityRequirementObject.Single().Key;
         var schemeClassName = securitySchemaTranslations.GetSecuritySchemeName(schemeReference).ToPascalCase();
-        var constructorArguments = OpenApiSecuritySchemeExtensions.GetSchemeConstructorArguments(schemeReference);
+        var constructorArguments = schemeReference.GetSchemeConstructorArguments();
         return
 $$"""
     internal sealed partial class {{className}} : Authentication

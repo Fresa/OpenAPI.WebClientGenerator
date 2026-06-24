@@ -51,6 +51,11 @@ internal sealed class EntityGenerator(string name)
                 {
                     yield return source;
                 }
+
+                if (operation.Value.AuthenticationGenerator is not null)
+                {
+                    yield return operation.Value.AuthenticationGenerator.Generate(@namespace, entityClassChain);
+                }
             }
 
             foreach (var source in methodGenerator.Children.Values
@@ -174,9 +179,8 @@ $$"""
 {{ new[] 
     { 
         operation.Value.RequestBodyGenerator.GenerateClass(),
-        operation.Value.QueryGenerator.GenerateClass(), 
-        operation.Value.HeadersGenerator.GenerateClass(),
-        operation.Value.AuthenticationGenerator?.GenerateClass() ?? string.Empty
+        operation.Value.QueryGenerator.GenerateClass(),
+        operation.Value.HeadersGenerator.GenerateClass()
     }
     .AggregateToString()
     .Trim()
