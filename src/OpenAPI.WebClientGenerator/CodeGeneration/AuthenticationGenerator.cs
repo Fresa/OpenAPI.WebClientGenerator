@@ -24,7 +24,7 @@ internal abstract partial class Authentication
     securityRequirementObject.Count == 1
         ? GenerateSingleSchemeRequirement(securityRequirementObject)
         : GenerateMultiSchemeRequirement(securityRequirementObject))}}
-    internal abstract void AddTo(RequestBuilder requestBuilder);  
+    internal abstract void AddTo(RequestBuilder requestBuilder);
 }
 """;
 
