@@ -36,27 +36,34 @@ internal sealed class EntityGenerator(string name)
         foreach (var methodGenerator in _methodSignatures.Values)
         {
             var entityClassName = _className + methodGenerator.Parameters.Length;
-            var entityClassChain = outerClassNames.Append(entityClassName).ToArray();
+            var entityFullyQualifiedName = outerClassNames.Append(entityClassName).ToArray();
 
             foreach (var operation in methodGenerator.Operations)
             {
                 foreach (var source in operation.ResponseGenerator.Generate(
                     @namespace,
-                    nestingClassNames: entityClassChain,
+                    nestingClassNames: entityFullyQualifiedName,
                     className: $"{operation.OperationClassName}Response"))
                 {
                     yield return source;
                 }
 
+                var operationFullyQualifiedName = 
+                    entityFullyQualifiedName.Append(operation.OperationClassName)
+                        .ToArray(); 
                 if (operation.AuthenticationGenerator is not null)
                 {
-                    yield return operation.AuthenticationGenerator.Generate(@namespace, entityClassChain.Append(operation.OperationClassName).ToArray());
+                    yield return operation.AuthenticationGenerator.Generate(
+                        @namespace, operationFullyQualifiedName);
                 }
+
+                yield return operation.RequestBodyGenerator.Generate(
+                    @namespace, operationFullyQualifiedName);
             }
 
             foreach (var source in methodGenerator.Children.Values
                          .SelectMany(child =>
-                             child.Generate(@namespace, childEntityChain, entityClassChain, rootEntity: false)))
+                             child.Generate(@namespace, childEntityChain, entityFullyQualifiedName, rootEntity: false)))
             {
                 yield return source;
             }
@@ -106,7 +113,7 @@ internal partial class {{className}}(RequestBuilder requestBuilder, WebClientCon
 {{{methodGenerator.Operations.AggregateToString(operation =>
 $$"""
     internal async Task<Result<{{operation.OperationClassName}}Response>> {{operation.OperationClassName}}Async({{
-        GetParameterArgumentExpressions(operation, operation.OperationClassName)
+        GetParameterArgumentExpressions(operation)
             .AggregateToString()
             .Indent(8)
             .TrimStart()
@@ -174,7 +181,6 @@ $$"""
 """ : "")}}
 {{ new[] 
     { 
-        operation.RequestBodyGenerator.GenerateClass(),
         operation.QueryGenerator.GenerateClass(),
         operation.HeadersGenerator.GenerateClass()
     }
@@ -223,8 +229,7 @@ $$"""
     }
 
     private static IEnumerable<string> GetParameterArgumentExpressions(
-        OperationGenerator operationGenerator,
-        string operationClassName)
+        OperationGenerator operationGenerator)
     {
         var expressions = new ParametersGenerator[]
             {
@@ -236,13 +241,13 @@ $$"""
         if (operationGenerator.RequestBodyGenerator.HasBody)
         {
             expressions = operationGenerator.RequestBodyGenerator.IsRequired
-                ? expressions.Prepend("Content content,")
-                : expressions.Append("Content? content = null,");
+                ? expressions.Prepend($"{operationGenerator.OperationClassName}.Content content,")
+                : expressions.Append($"{operationGenerator.OperationClassName}.Content? content = null,");
         }
 
         if (operationGenerator.AuthenticationGenerator is not null)
         {
-            expressions = expressions.Prepend($"{operationClassName}.SecurityRequirement security,");
+            expressions = expressions.Prepend($"{operationGenerator.OperationClassName}.SecurityRequirement security,");
         }
 
         return expressions;

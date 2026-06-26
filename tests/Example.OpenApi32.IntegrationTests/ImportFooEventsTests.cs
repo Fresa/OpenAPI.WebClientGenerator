@@ -12,7 +12,7 @@ public class ImportFooEventsTests(FooApplicationFactory app) : FooTestSpecificat
     [Fact]
     internal async Task ImportingFooEventsAsJsonl_ShouldReturnAccepted()
     {
-        var content = new Foo.Foo.Foo1.Events0.Content.ApplicationJsonl();
+        var content = new Foo.Foo.Foo1.Events0.Post.Content.ApplicationJsonl();
         var sendTask = SendAsync(content);
         (await content.WriteItemAsync(FooProperties.Create(name: "test"), CancellationToken)).IsValid().Should().BeTrue();
         (await content.WriteItemAsync(FooProperties.Create(name: "another test"), CancellationToken)).IsValid().Should().BeTrue();
@@ -23,7 +23,7 @@ public class ImportFooEventsTests(FooApplicationFactory app) : FooTestSpecificat
     [Fact]
     internal async Task ImportingFooEventsAsXJsonlines_ShouldReturnAccepted()
     {
-        var content = new Foo.Foo.Foo1.Events0.Content.ApplicationXJsonlines();
+        var content = new Foo.Foo.Foo1.Events0.Post.Content.ApplicationXJsonlines();
         var sendTask = SendAsync(content);
         (await content.WriteItemAsync(FooProperties.Create(name: "test"), CancellationToken)).IsValid().Should().BeTrue();
         (await content.WriteItemAsync(FooProperties.Create(name: "another test"), CancellationToken)).IsValid().Should().BeTrue();
@@ -34,7 +34,7 @@ public class ImportFooEventsTests(FooApplicationFactory app) : FooTestSpecificat
     [Fact]
     internal async Task ImportingFooEventsAsXNdjson_ShouldReturnAccepted()
     {
-        var content = new Foo.Foo.Foo1.Events0.Content.ApplicationXNdjson();
+        var content = new Foo.Foo.Foo1.Events0.Post.Content.ApplicationXNdjson();
         var sendTask = SendAsync(content);
         (await content.WriteItemAsync(FooProperties.Create(name: "test"), CancellationToken)).IsValid().Should().BeTrue();
         (await content.WriteItemAsync(FooProperties.Create(name: "another test"), CancellationToken)).IsValid().Should().BeTrue();
@@ -45,7 +45,7 @@ public class ImportFooEventsTests(FooApplicationFactory app) : FooTestSpecificat
     [Fact]
     internal async Task ImportingFooEventsAsJsonSeq_ShouldReturnAccepted()
     {
-        var content = new Foo.Foo.Foo1.Events0.Content.ApplicationJsonSeq();
+        var content = new Foo.Foo.Foo1.Events0.Post.Content.ApplicationJsonSeq();
         var sendTask = SendAsync(content);
         (await content.WriteItemAsync(FooProperties.Create(name: "test"), CancellationToken)).IsValid().Should().BeTrue();
         (await content.WriteItemAsync(FooProperties.Create(name: "another test"), CancellationToken)).IsValid().Should().BeTrue();
@@ -56,7 +56,7 @@ public class ImportFooEventsTests(FooApplicationFactory app) : FooTestSpecificat
     [Fact]
     internal async Task ImportingFooEventsAsGeoJsonSeq_ShouldReturnAccepted()
     {
-        var content = new Foo.Foo.Foo1.Events0.Content.ApplicationGeoJsonSeq();
+        var content = new Foo.Foo.Foo1.Events0.Post.Content.ApplicationGeoJsonSeq();
         var sendTask = SendAsync(content);
         (await content.WriteItemAsync(FooProperties.Create(name: "test"), CancellationToken)).IsValid().Should().BeTrue();
         (await content.WriteItemAsync(FooProperties.Create(name: "another test"), CancellationToken)).IsValid().Should().BeTrue();
@@ -67,7 +67,7 @@ public class ImportFooEventsTests(FooApplicationFactory app) : FooTestSpecificat
     [Fact]
     internal async Task ImportingInvalidFooEvent_ShouldReturnInvalidValidationResults()
     {
-        using var content = new Foo.Foo.Foo1.Events0.Content.ApplicationJsonl();
+        using var content = new Foo.Foo.Foo1.Events0.Post.Content.ApplicationJsonl();
         var notAFooEvent = FooProperties.Parse("\"not-a-foo-event\"");
 
         var validationResults = await content.WriteItemAsync(notAFooEvent, CancellationToken);
@@ -75,7 +75,7 @@ public class ImportFooEventsTests(FooApplicationFactory app) : FooTestSpecificat
         validationResults.IsValid().Should().BeFalse();
     }
 
-    private async Task SendAsync(Foo.Foo.Foo1.Events0.Content content)
+    private async Task SendAsync(Foo.Foo.Foo1.Events0.Post.Content content)
     {
         using var httpClient = app.CreateClient()
             .WithOAuth2ImplicitFlowAuthentication("update");

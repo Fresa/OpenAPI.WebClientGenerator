@@ -660,9 +660,8 @@ internal partial class TestClient
 
         diagnostics.Should().BeEmpty();
 
-        var source = compilation.GetSource("TestClient.Items.g.cs", Cancellation);
-
-        source.Should().Be("""
+        var entitySource = compilation.GetSource("TestClient.Items.g.cs", Cancellation);
+        entitySource.Should().Be("""
             #nullable enable
             using Corvus.Json;
             using System.Collections.Immutable;
@@ -681,7 +680,7 @@ internal partial class TestClient
             
                 internal partial class Items0(RequestBuilder requestBuilder, WebClientConfiguration configuration)
                 {
-                    internal async Task<Result<PostResponse>> PostAsync(Content content,
+                    internal async Task<Result<PostResponse>> PostAsync(Post.Content content,
                         CancellationToken cancellation = default)
                     {
                         if (!requestBuilder.ValidationContext.IsValid)
@@ -702,58 +701,79 @@ internal partial class TestClient
                         return Result<PostResponse>.WithResponse(response, responseValidationContext.Results
                             .WithLocation(configuration.OpenApiSpecificationUri));
                     }
-
-                    internal abstract class Content
+                }
+            }
+            #nullable restore
+            """.ReplaceLineEndings("\n"));
+        
+        var contentSource = compilation.GetSource("TestClient.Items0.Post.Content.g.cs", Cancellation);
+        contentSource.Should().Be("""
+            #nullable enable
+            using Corvus.Json;
+            using System.Collections.Immutable;
+            using System.IO.Pipelines;
+            using System.Net.Http.Headers;
+            using System.Text;
+            
+            namespace Example;
+            internal partial class TestClient
+            {
+                internal partial class Items0
+                {
+                    internal partial class Post
                     {
-                        internal abstract string? MediaType { get; }
-            
-                        /// <summary>
-                        /// Ensures that the specified content type matches the specification
-                        /// <exception cref="ArgumentOutOfRangeException">Thrown when the specified content type does not match the specification</exception>
-                        /// </summary>
-                        /// <param name="contentType">Content type</param>
-                        /// <param name="expectedContentType">Expected content type</param>
-                        protected void EnsureExpectedContentType(MediaTypeHeaderValue contentType, MediaTypeHeaderValue expectedContentType)
+                        internal abstract class Content
                         {
-                            if (!contentType.IsSubsetOf(expectedContentType))
-                            {
-                                throw new ArgumentOutOfRangeException($"Expected content type {contentType.MediaType} to be a subset of {expectedContentType.MediaType}");
-                            }
-                        }
+                            internal abstract string? MediaType { get; }
             
-                        internal abstract HttpContent Get();
-
-                        internal abstract ValidationContext Validate(ValidationContext validationContext, ValidationLevel validationLevel);
-            
-                        /// <summary>
-                        /// Request for content application/json
-                        /// </summary>
-                        internal sealed class ApplicationJson : Content
-                        {
-                            private Example.Paths.Items.Post.RequestBody.Content.ApplicationJson _content;
-
                             /// <summary>
-                            /// Construct request for content application/json
+                            /// Ensures that the specified content type matches the specification
+                            /// <exception cref="ArgumentOutOfRangeException">Thrown when the specified content type does not match the specification</exception>
                             /// </summary>
-                            /// <param name="applicationJson">Content</param>
-                            public ApplicationJson(Example.Paths.Items.Post.RequestBody.Content.ApplicationJson applicationJson)
+                            /// <param name="contentType">Content type</param>
+                            /// <param name="expectedContentType">Expected content type</param>
+                            protected void EnsureExpectedContentType(MediaTypeHeaderValue contentType, MediaTypeHeaderValue expectedContentType)
                             {
-                                _content = applicationJson;
-                                MediaType = "application/json";
+                                if (!contentType.IsSubsetOf(expectedContentType))
+                                {
+                                    throw new ArgumentOutOfRangeException($"Expected content type {contentType.MediaType} to be a subset of {expectedContentType.MediaType}");
+                                }
                             }
-
-                            internal override string MediaType { get; }
-
-                            internal override HttpContent Get() =>
-                               new StringContent(
-                                   _content.Serialize(),
-                                   encoding: Encoding.UTF8,
-                                   mediaType: MediaType
-                               );
-                            private const string ContentSchemaLocation = "#/paths/~1items/post/requestBody/content/application~1json/schema";
-                            /// <inheritdoc/>
-                            internal override ValidationContext Validate(ValidationContext validationContext, ValidationLevel validationLevel) =>
-                                _content.Validate(ContentSchemaLocation, true, validationContext, validationLevel);
+            
+                            internal abstract HttpContent Get();
+            
+                            internal abstract ValidationContext Validate(ValidationContext validationContext, ValidationLevel validationLevel);
+            
+                            /// <summary>
+                            /// Request for content application/json
+                            /// </summary>
+                            internal sealed class ApplicationJson : Content
+                            {
+                                private Example.Paths.Items.Post.RequestBody.Content.ApplicationJson _content;
+            
+                                /// <summary>
+                                /// Construct request for content application/json
+                                /// </summary>
+                                /// <param name="applicationJson">Content</param>
+                                public ApplicationJson(Example.Paths.Items.Post.RequestBody.Content.ApplicationJson applicationJson)
+                                {
+                                    _content = applicationJson;
+                                    MediaType = "application/json";
+                                }
+            
+                                internal override string MediaType { get; }
+            
+                                internal override HttpContent Get() =>
+                                   new StringContent(
+                                       _content.Serialize(),
+                                       encoding: Encoding.UTF8,
+                                       mediaType: MediaType
+                                   );
+                                private const string ContentSchemaLocation = "#/paths/~1items/post/requestBody/content/application~1json/schema";
+                                /// <inheritdoc/>
+                                internal override ValidationContext Validate(ValidationContext validationContext, ValidationLevel validationLevel) =>
+                                    _content.Validate(ContentSchemaLocation, true, validationContext, validationLevel);
+                            }
                         }
                     }
                 }
@@ -816,7 +836,7 @@ internal partial class TestClient
 
                 internal partial class Items0(RequestBuilder requestBuilder, WebClientConfiguration configuration)
                 {
-                    internal async Task<Result<PostResponse>> PostAsync(Content? content = null,
+                    internal async Task<Result<PostResponse>> PostAsync(Post.Content? content = null,
                         CancellationToken cancellation = default)
                     {
                         if (!requestBuilder.ValidationContext.IsValid)
@@ -836,60 +856,6 @@ internal partial class TestClient
                             ValidationContext.ValidContext;
                         return Result<PostResponse>.WithResponse(response, responseValidationContext.Results
                             .WithLocation(configuration.OpenApiSpecificationUri));
-                    }
-
-                    internal abstract class Content
-                    {
-                        internal abstract string? MediaType { get; }
-
-                        /// <summary>
-                        /// Ensures that the specified content type matches the specification
-                        /// <exception cref="ArgumentOutOfRangeException">Thrown when the specified content type does not match the specification</exception>
-                        /// </summary>
-                        /// <param name="contentType">Content type</param>
-                        /// <param name="expectedContentType">Expected content type</param>
-                        protected void EnsureExpectedContentType(MediaTypeHeaderValue contentType, MediaTypeHeaderValue expectedContentType)
-                        {
-                            if (!contentType.IsSubsetOf(expectedContentType))
-                            {
-                                throw new ArgumentOutOfRangeException($"Expected content type {contentType.MediaType} to be a subset of {expectedContentType.MediaType}");
-                            }
-                        }
-
-                        internal abstract HttpContent Get();
-
-                        internal abstract ValidationContext Validate(ValidationContext validationContext, ValidationLevel validationLevel);
-
-                        /// <summary>
-                        /// Request for content application/json
-                        /// </summary>
-                        internal sealed class ApplicationJson : Content
-                        {
-                            private Example.Paths.Items.Post.RequestBody.Content.ApplicationJson _content;
-
-                            /// <summary>
-                            /// Construct request for content application/json
-                            /// </summary>
-                            /// <param name="applicationJson">Content</param>
-                            public ApplicationJson(Example.Paths.Items.Post.RequestBody.Content.ApplicationJson applicationJson)
-                            {
-                                _content = applicationJson;
-                                MediaType = "application/json";
-                            }
-
-                            internal override string MediaType { get; }
-
-                            internal override HttpContent Get() =>
-                               new StringContent(
-                                   _content.Serialize(),
-                                   encoding: Encoding.UTF8,
-                                   mediaType: MediaType
-                               );
-                            private const string ContentSchemaLocation = "#/paths/~1items/post/requestBody/content/application~1json/schema";
-                            /// <inheritdoc/>
-                            internal override ValidationContext Validate(ValidationContext validationContext, ValidationLevel validationLevel) =>
-                                _content.Validate(ContentSchemaLocation, true, validationContext, validationLevel);
-                        }
                     }
                 }
             }
@@ -940,7 +906,7 @@ internal partial class TestClient
             """
                     internal async Task<Result<PostResponse>> PostAsync(Query query,
                         Header? header = null,
-                        Content? content = null,
+                        Post.Content? content = null,
                         CancellationToken cancellation = default)
             """.ReplaceLineEndings("\n"));
     }

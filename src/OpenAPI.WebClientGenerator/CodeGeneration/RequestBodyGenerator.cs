@@ -24,6 +24,21 @@ internal sealed class RequestBodyGenerator
         _contentGenerators = contentGenerators;
     }
     
+    internal SourceCode Generate(string @namespace, IReadOnlyList<string> nestingClassNames) =>
+        new($"{string.Join(".", nestingClassNames)}.Content.g.cs",
+$$"""
+#nullable enable
+using Corvus.Json;
+using System.Collections.Immutable;
+using System.IO.Pipelines;
+using System.Net.Http.Headers;
+using System.Text;
+
+namespace {{@namespace}};
+{{NestedClassGenerator.Wrap(nestingClassNames, GenerateClass)}}
+#nullable restore
+""");
+
     public string GenerateClass()
     {
         if (!_contentGenerators.Any())

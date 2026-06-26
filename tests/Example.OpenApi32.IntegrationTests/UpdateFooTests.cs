@@ -4,6 +4,7 @@ using AwesomeAssertions;
 using Corvus.Json;
 using Example.Foo.Components.Schemas;
 using OpenAPI.IntegrationTestHelpers.Auth;
+using Put = Example.Foo.Foo.Foo1.Put;
 
 namespace Example.OpenApi32.IntegrationTests;
 
@@ -17,8 +18,8 @@ public class UpdateFooTests(FooApplicationFactory app) : FooTestSpecification, I
         var client = new Foo.Foo(httpClient);
         var result = await client.Foo_(1)
             .PutAsync(
-                security: new Foo.Foo.Foo1.Put.SecurityRequirement.PetstoreAuth(OIDCAuthHttpHandler.GetJwt("update")),
-                content: new Foo.Foo.Foo1.Content.ApplicationJson(
+                security: new Put.SecurityRequirement.PetstoreAuth(OIDCAuthHttpHandler.GetJwt("update")),
+                content: new Put.Content.ApplicationJson(
                     FooProperties.Create(name: "test")),
                 header: new Foo.Foo.Foo1.Header
                 {
@@ -52,9 +53,9 @@ public class UpdateFooTests(FooApplicationFactory app) : FooTestSpecification, I
         var client = new Foo.Foo(httpClient);
         var result = await client.Foo_(1)
             .PutAsync(
-                security: new Foo.Foo.Foo1.Put.SecurityRequirement.PetstoreAuth(
+                security: new Put.SecurityRequirement.PetstoreAuth(
                     OIDCAuthHttpHandler.GetJwt("update")),
-                content: new Foo.Foo.Foo1.Content.ApplicationJson(
+                content: new Put.Content.ApplicationJson(
                     FooProperties.Create(name: "test")),
                 header: new Foo.Foo.Foo1.Header
                 {
