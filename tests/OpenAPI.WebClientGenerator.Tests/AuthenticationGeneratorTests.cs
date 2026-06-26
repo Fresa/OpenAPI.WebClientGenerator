@@ -9,7 +9,7 @@ namespace OpenAPI.WebClientGenerator.Tests;
 
 public class AuthenticationGeneratorTests(ITestOutputHelper testOutputHelper)
 {
-    private const string AuthenticationFile = "Foo.Foo0.Get.Authentication.g.cs";
+    private const string SecurityRequirementFile = "Foo.Foo0.Get.SecurityRequirement.g.cs";
 
     private CancellationToken Cancellation => TestContext.Current.CancellationToken;
 
@@ -43,9 +43,9 @@ public class AuthenticationGeneratorTests(ITestOutputHelper testOutputHelper)
         generatedFiles = compilation.SyntaxTrees
             .Select(tree => Path.GetFileName(tree.FilePath))
             .ToArray();
-        compilation.Output(AuthenticationFile, testOutputHelper, Cancellation);
-        return generatedFiles.Contains(AuthenticationFile)
-            ? compilation.GetSource(AuthenticationFile, Cancellation)
+        compilation.Output(SecurityRequirementFile, testOutputHelper, Cancellation);
+        return generatedFiles.Contains(SecurityRequirementFile)
+            ? compilation.GetSource(SecurityRequirementFile, Cancellation)
             : string.Empty;
     }
 
@@ -71,9 +71,9 @@ public class AuthenticationGeneratorTests(ITestOutputHelper testOutputHelper)
                 {
                     internal partial class Get
                     {
-                        internal abstract partial class Authentication
+                        internal abstract partial class SecurityRequirement
                         {
-                            internal sealed partial class BearerAuth : Authentication
+                            internal sealed partial class BearerAuth : SecurityRequirement
                             {
                                 private readonly SecuritySchemes.BearerAuth _scheme;
 
@@ -114,9 +114,9 @@ public class AuthenticationGeneratorTests(ITestOutputHelper testOutputHelper)
                 {
                     internal partial class Get
                     {
-                        internal abstract partial class Authentication
+                        internal abstract partial class SecurityRequirement
                         {
-                            internal sealed partial class ApiKeyAuthAndBearerAuth : Authentication
+                            internal sealed partial class ApiKeyAuthAndBearerAuth : SecurityRequirement
                             {
                                 internal required SecuritySchemes.ApiKeyAuth ApiKeyAuth { init; get; }
                                 internal required SecuritySchemes.BearerAuth BearerAuth { init; get; }
@@ -159,9 +159,9 @@ public class AuthenticationGeneratorTests(ITestOutputHelper testOutputHelper)
                 {
                     internal partial class Get
                     {
-                        internal abstract partial class Authentication
+                        internal abstract partial class SecurityRequirement
                         {
-                            internal sealed partial class ApiKeyAuth : Authentication
+                            internal sealed partial class ApiKeyAuth : SecurityRequirement
                             {
                                 private readonly SecuritySchemes.ApiKeyAuth _scheme;
 
@@ -170,7 +170,7 @@ public class AuthenticationGeneratorTests(ITestOutputHelper testOutputHelper)
 
                                 internal override void AddTo(RequestBuilder requestBuilder) => _scheme.AddTo(requestBuilder);
                             }
-                            internal sealed partial class BearerAuth : Authentication
+                            internal sealed partial class BearerAuth : SecurityRequirement
                             {
                                 private readonly SecuritySchemes.BearerAuth _scheme;
 
@@ -189,7 +189,7 @@ public class AuthenticationGeneratorTests(ITestOutputHelper testOutputHelper)
     }
 
     [Fact]
-    public void OperationWithoutSecurity_DoesNotGenerateAnAuthenticationFile()
+    public void OperationWithoutSecurity_DoesNotGenerateAnSecurityRequirementFile()
     {
         Generate(
             """
@@ -198,6 +198,6 @@ public class AuthenticationGeneratorTests(ITestOutputHelper testOutputHelper)
             operationSecurity: "",
             out var generatedFiles);
 
-        generatedFiles.Should().NotContain(AuthenticationFile);
+        generatedFiles.Should().NotContain(SecurityRequirementFile);
     }
 }

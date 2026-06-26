@@ -132,7 +132,7 @@ $"""
 """ : "")}}{{(operation.AuthenticationGenerator is null ? "" : 
 """
 
-        authentication.AddTo(requestBuilder);
+        security.AddTo(requestBuilder);
 """)}}
         if (!requestBuilder.ValidationContext.IsValid)
             return Result<{{GetResponseTypeName(operation)}}>.WithInvalidRequest(requestBuilder.ValidationContext.Results
@@ -242,7 +242,7 @@ $$"""
 
         if (operationGenerator.AuthenticationGenerator is not null)
         {
-            expressions = expressions.Prepend($"{operationClassName}.Authentication authentication,");
+            expressions = expressions.Prepend($"{operationClassName}.SecurityRequirement security,");
         }
 
         return expressions;

@@ -9,7 +9,7 @@ namespace OpenAPI.WebClientGenerator.CodeGeneration;
 internal sealed class AuthenticationGenerator(Dictionary<OpenApiSecuritySchemeReference, (ParameterGenerator Parameters, List<string> Scopes)>[] securityRequirementObjects, SecuritySchemaTranslations securitySchemaTranslations)
 {
     internal SourceCode Generate(string @namespace, IReadOnlyList<string> nestingClassNames) =>
-        new($"{string.Join(".", nestingClassNames)}.Authentication.g.cs",
+        new($"{string.Join(".", nestingClassNames)}.SecurityRequirement.g.cs",
 $$"""
 #nullable enable
 namespace {{@namespace}};
@@ -19,7 +19,7 @@ namespace {{@namespace}};
 
     private string GenerateClass() =>
 $$"""
-internal abstract partial class Authentication
+internal abstract partial class SecurityRequirement
 {{{securityRequirementObjects.AggregateToString(securityRequirementObject =>
     securityRequirementObject.Count == 1
         ? GenerateSingleSchemeRequirement(securityRequirementObject)
@@ -37,7 +37,7 @@ internal abstract partial class Authentication
         var constructorArguments = schemeReference.GetSchemeConstructorArguments();
         return
 $$"""
-    internal sealed partial class {{className}} : Authentication
+    internal sealed partial class {{className}} : SecurityRequirement
     {
         private readonly SecuritySchemes.{{schemeClassName}} _scheme;
 
@@ -55,7 +55,7 @@ $$"""
         var className = GetAuthenticationClassName(securityRequirementObject);
         return
 $$"""
-    internal sealed partial class {{className}} : Authentication
+    internal sealed partial class {{className}} : SecurityRequirement
     {{{securityRequirementObject.AggregateToString(securityRequirement =>
         {
             var schemeClassName = securitySchemaTranslations.GetSecuritySchemeName(securityRequirement.Key).ToPascalCase();
