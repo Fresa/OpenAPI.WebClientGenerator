@@ -189,11 +189,12 @@ public sealed class WebClientGenerator : IIncrementalGenerator
                 var operationParameters = operationParameterGenerators.Values.ToArray();
                 authGenerator.TryGetAuthenticationGenerator(operation, operationParameters, out var authenticationGenerator);
                 var operationGenerator = new OperationGenerator(
+                    openApiOperation.Key,
                     operationParameters,
                     requestBodyGenerator,
                     responseGenerator,
                     authenticationGenerator);
-                methodGenerator.AddOperation(openApiOperation.Key, operationGenerator);
+                methodGenerator.AddOperation(operationGenerator);
             }
         }
 

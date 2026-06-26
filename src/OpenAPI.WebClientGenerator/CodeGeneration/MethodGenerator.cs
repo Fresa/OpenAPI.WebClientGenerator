@@ -7,14 +7,14 @@ internal sealed class MethodGenerator(string pathExpression, ParameterGenerator[
 {
     public string PathExpression { get; } = pathExpression;
     public ParameterGenerator[] Parameters { get; } = parameters;
-    internal Dictionary<HttpMethod, OperationGenerator> Operations { get; } = new();
+    internal IReadOnlyCollection<OperationGenerator> Operations => _operations.Values;
+    private readonly Dictionary<HttpMethod, OperationGenerator> _operations = new();
     internal Dictionary<string, EntityGenerator> Children { get; } = new();
 
     public void AddOperation(
-        HttpMethod method,
         OperationGenerator operation)
     {
-        Operations.Add(method, operation);
+        _operations.Add(operation.Operation, operation);
     }
 
     internal EntityGenerator AddEntity(string name)

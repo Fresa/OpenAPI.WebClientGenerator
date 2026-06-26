@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
-using System.Text;
 using OpenAPI.WebClientGenerator.Extensions;
 
 namespace OpenAPI.WebClientGenerator.CodeGeneration;
@@ -43,18 +40,17 @@ internal sealed class EntityGenerator(string name)
 
             foreach (var operation in methodGenerator.Operations)
             {
-                var verb = operation.Key.Method.ToLower().ToPascalCase();
-                foreach (var source in operation.Value.ResponseGenerator.Generate(
+                foreach (var source in operation.ResponseGenerator.Generate(
                     @namespace,
                     nestingClassNames: entityClassChain,
-                    className: $"{verb}Response"))
+                    className: $"{operation.OperationClassName}Response"))
                 {
                     yield return source;
                 }
 
-                if (operation.Value.AuthenticationGenerator is not null)
+                if (operation.AuthenticationGenerator is not null)
                 {
-                    yield return operation.Value.AuthenticationGenerator.Generate(@namespace, entityClassChain);
+                    yield return operation.AuthenticationGenerator.Generate(@namespace, entityClassChain.Append(operation.OperationClassName).ToArray());
                 }
             }
 
@@ -67,8 +63,8 @@ internal sealed class EntityGenerator(string name)
         }
     }
 
-    private string GetResponseTypeName(HttpMethod method) =>
-        $"{method.Method.ToLower().ToPascalCase()}Response";
+    private static string GetResponseTypeName(OperationGenerator operation) =>
+        $"{operation.OperationClassName}Response";
     
     private string GenerateClass(string @namespace, IReadOnlyList<string> nestedClassNames, bool rootEntity = false)
     {
@@ -107,14 +103,14 @@ $$""""
 }
 
 internal partial class {{className}}(RequestBuilder requestBuilder, WebClientConfiguration configuration)
-{{{methodGenerator.Operations.AggregateToString(operation => 
+{{{methodGenerator.Operations.AggregateToString(operation =>
 $$"""
-    internal async Task<Result<{{GetResponseTypeName(operation.Key)}}>> {{operation.Key.Method.ToLower().ToPascalCase()}}Async({{
-        GetParameterArgumentExpressions(operation.Value)
+    internal async Task<Result<{{operation.OperationClassName}}Response>> {{operation.OperationClassName}}Async({{
+        GetParameterArgumentExpressions(operation, operation.OperationClassName)
             .AggregateToString()
             .Indent(8)
             .TrimStart()
-        }}{{(operation.Value.ResponseGenerator.GeneratesContent ? 
+        }}{{(operation.ResponseGenerator.GeneratesContent ? 
 $"""
 
         Accept? accepts = null,
@@ -123,50 +119,50 @@ $"""
     {{{
             new ParametersGenerator []
             {
-                operation.Value.QueryGenerator,
-                operation.Value.HeadersGenerator
+                operation.QueryGenerator,
+                operation.HeadersGenerator
             }
             .Select(GetParameterBuilderMethod)
             .AggregateToString()
             .Indent(8)
-        }}{{(operation.Value.ResponseGenerator.GeneratesContent ? 
+        }}{{(operation.ResponseGenerator.GeneratesContent ? 
 """
 
         requestBuilder.AcceptMediaTypes(accepts?.MediaTypes ?? []);
-""" : "")}}{{(operation.Value.AuthenticationGenerator is null ? "" : 
+""" : "")}}{{(operation.AuthenticationGenerator is null ? "" : 
 """
 
         authentication.AddTo(requestBuilder);
 """)}}
         if (!requestBuilder.ValidationContext.IsValid)
-            return Result<{{GetResponseTypeName(operation.Key)}}>.WithInvalidRequest(requestBuilder.ValidationContext.Results
+            return Result<{{GetResponseTypeName(operation)}}>.WithInvalidRequest(requestBuilder.ValidationContext.Results
                 .WithLocation(configuration.OpenApiSpecificationUri));
         var responseMessage = await requestBuilder
             .SendAsync(
                 "{{methodGenerator.PathExpression}}",
-                "{{operation.Key.Method}}",
-                {{GetContentExpression(operation.Value.RequestBodyGenerator)}},
+                "{{operation.Operation.Method}}",
+                {{GetContentExpression(operation.RequestBodyGenerator)}},
                 cancellation)
             .ConfigureAwait(false);
-        var response = await {{operation.Key.Method.ToLower().ToPascalCase()}}Response.BindAsync(responseMessage, configuration, cancellation)
+        var response = await {{GetResponseTypeName(operation)}}.BindAsync(responseMessage, configuration, cancellation)
             .ConfigureAwait(false);
         var responseValidationContext = configuration.ValidateResponses ?
             response.Validate(configuration.ValidationLevel) :
             ValidationContext.ValidContext;
-        return Result<{{GetResponseTypeName(operation.Key)}}>.WithResponse(response, responseValidationContext.Results
+        return Result<{{GetResponseTypeName(operation)}}>.WithResponse(response, responseValidationContext.Results
             .WithLocation(configuration.OpenApiSpecificationUri));
-    }{{(operation.Value.ResponseGenerator.GeneratesContent ? 
+    }{{(operation.ResponseGenerator.GeneratesContent ? 
 $$"""
     
     internal sealed class Accept
     {
         private Accept() {}
         internal static Accept Content<T>()
-            where T : {{operation.Key.Method.ToLower().ToPascalCase()}}Response.IAcceptContent =>
+            where T : {{GetResponseTypeName(operation)}}.IAcceptContent =>
             new Accept().And<T>();
 
         internal Accept And<T>()
-            where T : {{operation.Key.Method.ToLower().ToPascalCase()}}Response.IAcceptContent
+            where T : {{GetResponseTypeName(operation)}}.IAcceptContent
         {
             _mediaTypes.Add(T.MediaType);
             return this;
@@ -178,9 +174,9 @@ $$"""
 """ : "")}}
 {{ new[] 
     { 
-        operation.Value.RequestBodyGenerator.GenerateClass(),
-        operation.Value.QueryGenerator.GenerateClass(),
-        operation.Value.HeadersGenerator.GenerateClass()
+        operation.RequestBodyGenerator.GenerateClass(),
+        operation.QueryGenerator.GenerateClass(),
+        operation.HeadersGenerator.GenerateClass()
     }
     .AggregateToString()
     .Trim()
@@ -188,7 +184,8 @@ $$"""
     .Indent(4)
     .TrimEnd()
 }}
-""")}}
+"""
+)}}
 }
 
 """;
@@ -226,7 +223,8 @@ $$"""
     }
 
     private static IEnumerable<string> GetParameterArgumentExpressions(
-        OperationGenerator operationGenerator)
+        OperationGenerator operationGenerator,
+        string operationClassName)
     {
         var expressions = new ParametersGenerator[]
             {
@@ -244,7 +242,7 @@ $$"""
 
         if (operationGenerator.AuthenticationGenerator is not null)
         {
-            expressions = expressions.Prepend("Authentication authentication,");
+            expressions = expressions.Prepend($"{operationClassName}.Authentication authentication,");
         }
 
         return expressions;
