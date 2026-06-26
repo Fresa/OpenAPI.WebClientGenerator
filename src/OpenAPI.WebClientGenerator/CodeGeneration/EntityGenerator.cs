@@ -57,6 +57,10 @@ internal sealed class EntityGenerator(string name)
                         @namespace, operationFullyQualifiedName);
                 }
 
+                yield return operation.QueryGenerator.Generate(
+                    @namespace, operationFullyQualifiedName);
+                yield return operation.HeadersGenerator.Generate(
+                    @namespace, operationFullyQualifiedName);
                 yield return operation.RequestBodyGenerator.Generate(
                     @namespace, operationFullyQualifiedName);
             }
@@ -179,19 +183,9 @@ $$"""
         internal MediaTypeWithQualityHeaderValue[] MediaTypes => _mediaTypes.ToArray();
     }
 """ : "")}}
-{{ new[] 
-    { 
-        operation.QueryGenerator.GenerateClass(),
-        operation.HeadersGenerator.GenerateClass()
-    }
-    .AggregateToString()
-    .Trim()
-    .PrependNewline()
-    .Indent(4)
-    .TrimEnd()
-}}
+
 """
-)}}
+).TrimEnd()}}
 }
 
 """;
@@ -201,8 +195,6 @@ $$"""
 #nullable restore
 """;
     }
-
-    
 
     private static string GetMethodParameterList(MethodGenerator methodGenerator) =>
         methodGenerator.Parameters.AggregateToString(parameter =>
@@ -216,7 +208,9 @@ $$"""
             : $"{(parametersGenerator.IsOptional ?
                 $"({parametersGenerator.ClassName.ToCamelCase()} ?? new())" : parametersGenerator.ClassName.ToCamelCase())}.AddTo(requestBuilder);";
 
-    private static string GetParameterArgumentExpression(ParametersGenerator parametersGenerator)
+    private static string GetParameterArgumentExpression(
+        ParametersGenerator parametersGenerator,
+        OperationGenerator operationGenerator)
     {
         if (parametersGenerator.IsEmpty)
         {
@@ -225,7 +219,7 @@ $$"""
 
         var terny = parametersGenerator.IsOptional ? "?" : string.Empty;
         var defaultExpression = parametersGenerator.IsOptional ? " = null" : string.Empty;
-        return $"{parametersGenerator.ClassName}{terny} {parametersGenerator.ClassName.ToCamelCase()}{defaultExpression},"; 
+        return $"{operationGenerator.OperationClassName}.{parametersGenerator.ClassName}{terny} {parametersGenerator.ClassName.ToCamelCase()}{defaultExpression},"; 
     }
 
     private static IEnumerable<string> GetParameterArgumentExpressions(
@@ -236,7 +230,8 @@ $$"""
                 operationGenerator.QueryGenerator,
                 operationGenerator.HeadersGenerator
             }.OrderBy(generator => generator.IsOptional)
-            .Select(GetParameterArgumentExpression);
+            .Select(parametersGenerator => 
+                GetParameterArgumentExpression(parametersGenerator, operationGenerator));
         
         if (operationGenerator.RequestBodyGenerator.HasBody)
         {

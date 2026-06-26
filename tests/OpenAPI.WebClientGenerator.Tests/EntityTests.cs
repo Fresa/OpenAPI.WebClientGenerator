@@ -904,8 +904,8 @@ internal partial class TestClient
 
         source.Should().Contain(
             """
-                    internal async Task<Result<PostResponse>> PostAsync(Query query,
-                        Header? header = null,
+                    internal async Task<Result<PostResponse>> PostAsync(Post.Query query,
+                        Post.Header? header = null,
                         Post.Content? content = null,
                         CancellationToken cancellation = default)
             """.ReplaceLineEndings("\n"));
@@ -963,7 +963,7 @@ internal partial class TestClient
 
     internal partial class Items0(RequestBuilder requestBuilder, WebClientConfiguration configuration)
     {
-        internal async Task<Result<GetResponse>> GetAsync(Query query,
+        internal async Task<Result<GetResponse>> GetAsync(Get.Query query,
             CancellationToken cancellation = default)
         {
             query.AddTo(requestBuilder);
@@ -985,42 +985,66 @@ internal partial class TestClient
             return Result<GetResponse>.WithResponse(response, responseValidationContext.Results
                 .WithLocation(configuration.OpenApiSpecificationUri));
         }
+    }
+}
+#nullable restore
+"""".ReplaceLineEndings("\n"));
 
-        internal sealed class Query
+        var querySource = compilation.GetSource("TestClient.Items0.Get.Query.g.cs", Cancellation);
+        testOutputHelper.WriteLine(querySource);
+
+        querySource.Should().Be(
+""""
+#nullable enable
+using Corvus.Json;
+using System.Collections.Immutable;
+using System.IO.Pipelines;
+using System.Net.Http.Headers;
+using System.Text;
+
+namespace Example;
+internal partial class TestClient
+{
+    internal partial class Items0
+    {
+        internal partial class Get
         {
-            internal required Corvus.Json.JsonInteger Limit { get; init; }
-            internal Corvus.Json.JsonString? Filter { get; init; }
-
-            internal RequestBuilder AddTo(RequestBuilder requestBuilder)
+            internal sealed class Query
             {
-                requestBuilder.AddQuery<Corvus.Json.JsonInteger>("limit",
-                    Limit,
-                    true,
-                    "#/paths/~1items/get/parameters/0/schema",
-                    """
-                    {
-                      "name": "limit",
-                      "in": "query",
-                      "required": true,
-                      "schema": {
-                        "type": "integer"
-                      }
-                    }
-                    """);
-                requestBuilder.AddQuery<Corvus.Json.JsonString>("filter",
-                    Filter,
-                    false,
-                    "#/paths/~1items/get/parameters/1/schema",
-                    """
-                    {
-                      "name": "filter",
-                      "in": "query",
-                      "schema": {
-                        "type": "string"
-                      }
-                    }
-                    """);
-                return requestBuilder;
+                internal required Corvus.Json.JsonInteger Limit { get; init; }
+                internal Corvus.Json.JsonString? Filter { get; init; }
+
+                internal RequestBuilder AddTo(RequestBuilder requestBuilder)
+                {
+                    requestBuilder.AddQuery<Corvus.Json.JsonInteger>("limit",
+                        Limit,
+                        true,
+                        "#/paths/~1items/get/parameters/0/schema",
+                        """
+                        {
+                          "name": "limit",
+                          "in": "query",
+                          "required": true,
+                          "schema": {
+                            "type": "integer"
+                          }
+                        }
+                        """);
+                    requestBuilder.AddQuery<Corvus.Json.JsonString>("filter",
+                        Filter,
+                        false,
+                        "#/paths/~1items/get/parameters/1/schema",
+                        """
+                        {
+                          "name": "filter",
+                          "in": "query",
+                          "schema": {
+                            "type": "string"
+                          }
+                        }
+                        """);
+                    return requestBuilder;
+                }
             }
         }
     }

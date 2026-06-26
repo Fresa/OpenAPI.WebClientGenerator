@@ -21,7 +21,7 @@ public class UpdateFooTests(FooApplicationFactory app) : FooTestSpecification, I
                 security: new Put.SecurityRequirement.PetstoreAuth(OIDCAuthHttpHandler.GetJwt("update")),
                 content: new Put.Content.ApplicationJson(
                     FooProperties.Create(name: "test")),
-                header: new Foo.Foo.Foo1.Header
+                header: new Put.Header
                 {
                     Bar = new JsonString("foo")
                 },
@@ -57,7 +57,7 @@ public class UpdateFooTests(FooApplicationFactory app) : FooTestSpecification, I
                     OIDCAuthHttpHandler.GetJwt("update")),
                 content: new Put.Content.ApplicationJson(
                     FooProperties.Create(name: "test")),
-                header: new Foo.Foo.Foo1.Header
+                header: new Put.Header
                 {
                     Bar = new JsonString("foo")
                 },

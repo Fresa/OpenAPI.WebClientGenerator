@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.OpenApi;
 using OpenAPI.WebClientGenerator.Extensions;
@@ -21,6 +22,21 @@ internal abstract class ParametersGenerator
     internal bool IsEmpty { get; }
     internal string ClassName => Location.GetDisplayName().ToPascalCase();
     internal bool IsOptional { get; }
+
+    internal SourceCode Generate(string @namespace, IReadOnlyList<string> nestingClassNames) =>
+        new($"{string.Join(".", nestingClassNames)}.{ClassName}.g.cs",
+$$"""
+#nullable enable
+using Corvus.Json;
+using System.Collections.Immutable;
+using System.IO.Pipelines;
+using System.Net.Http.Headers;
+using System.Text;
+
+namespace {{@namespace}};
+{{NestedClassGenerator.Wrap(nestingClassNames, GenerateClass)}}
+#nullable restore
+""");
 
     internal string GenerateClass()
     {
