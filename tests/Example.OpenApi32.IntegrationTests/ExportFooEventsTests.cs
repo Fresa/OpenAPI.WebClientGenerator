@@ -48,7 +48,7 @@ public class ExportFooEventsTests(FooApplicationFactory app) : FooTestSpecificat
         using var httpClient = app.CreateClient();
         var client = new Foo.Foo(httpClient);
         var result = await client.Foo_(1).Events().GetAsync(
-            accepts: Foo.Foo.Foo1.Events0.Accept.Content<T>(), 
+            accepts: Foo.Foo.Foo1.Events0.GetResponse.Accept.Content<T>(), 
             cancellation: CancellationToken);
 
         result.IsSuccessful.Should().BeTrue();

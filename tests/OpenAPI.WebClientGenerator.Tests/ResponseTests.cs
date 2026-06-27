@@ -1,3 +1,5 @@
+using System.IO;
+using System.Linq;
 using System.Threading;
 using AwesomeAssertions;
 using OpenAPI.WebClientGenerator.Tests.Utils;
@@ -969,5 +971,110 @@ internal partial class TestClient
             }
             #nullable restore
             """".ReplaceLineEndings("\n"));
+    }
+
+    [Fact]
+    public void ResponseWithContent_GeneratesAcceptClassInSeparateFile()
+    {
+        const string spec = """
+        {
+          "openapi": "3.0.0",
+          "info": { "title": "Test", "version": "1.0.0" },
+          "paths": {
+            "/foo": {
+              "get": {
+                "responses": {
+                  "200": {
+                    "description": "OK",
+                    "content": {
+                      "application/json": {
+                        "schema": {
+                          "type": "object",
+                          "properties": {
+                            "name": { "type": "string" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        """;
+
+        var compilation = WebClientGenerator.SetupFromContent(spec,
+            clientName: "TestClient",
+            @namespace: "Example",
+            cancellationToken: Cancellation,
+            diagnostics: out var diagnostics);
+
+        diagnostics.Should().BeEmpty();
+
+        compilation.Output("TestClient.Foo0.GetResponse.Accept.g.cs", testOutputHelper, Cancellation);
+        compilation.GetSource("TestClient.Foo0.GetResponse.Accept.g.cs", Cancellation).Should().Be(
+""""
+#nullable enable
+using System.Collections.Generic;
+using System.Net.Http.Headers;
+
+namespace Example;
+internal partial class TestClient
+{
+    internal partial class Foo0
+    {
+        internal partial class GetResponse
+        {
+            internal sealed class Accept
+            {
+                private Accept() {}
+                internal static Accept Content<T>()
+                    where T : GetResponse.IAcceptContent =>
+                    new Accept().And<T>();
+
+                internal Accept And<T>()
+                    where T : GetResponse.IAcceptContent
+                {
+                    _mediaTypes.Add(T.MediaType);
+                    return this;
+                }
+
+                private readonly List<MediaTypeWithQualityHeaderValue> _mediaTypes = [];
+                internal MediaTypeWithQualityHeaderValue[] MediaTypes => _mediaTypes.ToArray();
+            }
+        }
+    }
+}
+#nullable restore
+"""".ReplaceLineEndings("\n"));
+    }
+
+    [Fact]
+    public void ResponseWithoutContent_DoesNotGenerateAcceptClass()
+    {
+        const string spec = """
+        {
+          "openapi": "3.0.0",
+          "info": { "title": "Test", "version": "1.0.0" },
+          "paths": {
+            "/foo": {
+              "get": { "responses": { "200": { "description": "OK" } } }
+            }
+          }
+        }
+        """;
+
+        var compilation = WebClientGenerator.SetupFromContent(spec,
+            clientName: "TestClient",
+            @namespace: "Example",
+            cancellationToken: Cancellation,
+            diagnostics: out var diagnostics);
+
+        diagnostics.Should().BeEmpty();
+
+        compilation.SyntaxTrees
+            .Select(tree => Path.GetFileName(tree.FilePath))
+            .Should().NotContain("TestClient.Foo0.GetResponse.Accept.g.cs");
     }
 }

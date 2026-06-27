@@ -17,6 +17,10 @@ internal sealed class ResponseGenerator(
     {
         yield return GenerateBaseClass(@namespace, nestingClassNames, className);
         yield return GenerateUnknown(@namespace, nestingClassNames, className);
+        if (GeneratesContent)
+        {
+            yield return GenerateAccept(@namespace, nestingClassNames, className);
+        }
         foreach (var generator in responseContentGenerators)
         {
             foreach (var source in generator.Generate(@namespace, nestingClassNames, className))
@@ -100,6 +104,40 @@ $"""
         public abstract static MediaTypeWithQualityHeaderValue MediaType { get; }
     }
 """ : "")}}
+}
+""")}}
+#nullable restore
+""");
+
+    private static SourceCode GenerateAccept(
+        string @namespace,
+        IReadOnlyList<string> nestingClassNames,
+        string className) =>
+        new($"{string.Join(".", nestingClassNames)}.{className}.Accept.g.cs",
+$$"""
+#nullable enable
+using System.Collections.Generic;
+using System.Net.Http.Headers;
+
+namespace {{@namespace}};
+{{NestedClassGenerator.Wrap(nestingClassNames.Append(className).ToArray(), () =>
+$$"""
+internal sealed class Accept
+{
+    private Accept() {}
+    internal static Accept Content<T>()
+        where T : {{className}}.IAcceptContent =>
+        new Accept().And<T>();
+
+    internal Accept And<T>()
+        where T : {{className}}.IAcceptContent
+    {
+        _mediaTypes.Add(T.MediaType);
+        return this;
+    }
+
+    private readonly List<MediaTypeWithQualityHeaderValue> _mediaTypes = [];
+    internal MediaTypeWithQualityHeaderValue[] MediaTypes => _mediaTypes.ToArray();
 }
 """)}}
 #nullable restore
