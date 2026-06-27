@@ -6,7 +6,7 @@ using OpenAPI.WebClientGenerator.Extensions;
 
 namespace OpenAPI.WebClientGenerator.CodeGeneration;
 
-internal sealed class AuthenticationGenerator(Dictionary<OpenApiSecuritySchemeReference, (ParameterGenerator Parameters, List<string> Scopes)>[] securityRequirementObjects, SecuritySchemaTranslations securitySchemaTranslations)
+internal sealed class SecurityRequirementGenerator(Dictionary<OpenApiSecuritySchemeReference, (ParameterGenerator Parameters, List<string> Scopes)>[] securityRequirementObjects, SecuritySchemaTranslations securitySchemaTranslations)
 {
     internal SourceCode Generate(string @namespace, IReadOnlyList<string> nestingClassNames) =>
         new($"{string.Join(".", nestingClassNames)}.SecurityRequirement.g.cs",

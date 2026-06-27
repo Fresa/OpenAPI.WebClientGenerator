@@ -50,9 +50,9 @@ internal sealed class EntityGenerator(string name)
                     yield return source;
                 }
 
-                if (operation.AuthenticationGenerator is not null)
+                if (operation.SecurityRequirementGenerator is not null)
                 {
-                    yield return operation.AuthenticationGenerator.Generate(
+                    yield return operation.SecurityRequirementGenerator.Generate(
                         @namespace, operationFullyQualifiedName);
                 }
 
@@ -142,7 +142,7 @@ $"""
 """
 
         requestBuilder.AcceptMediaTypes(accepts?.MediaTypes ?? []);
-""" : "")}}{{(operation.AuthenticationGenerator is null ? "" : 
+""" : "")}}{{(operation.SecurityRequirementGenerator is null ? "" : 
 """
 
         security.AddTo(requestBuilder);
@@ -222,7 +222,7 @@ $"""
                 : expressions.Append($"{operationGenerator.OperationClassName}.Content? content = null,");
         }
 
-        if (operationGenerator.AuthenticationGenerator is not null)
+        if (operationGenerator.SecurityRequirementGenerator is not null)
         {
             expressions = expressions.Prepend($"{operationGenerator.OperationClassName}.SecurityRequirement security,");
         }

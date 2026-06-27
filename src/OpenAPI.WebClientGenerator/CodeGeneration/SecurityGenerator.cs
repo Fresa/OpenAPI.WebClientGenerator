@@ -164,7 +164,7 @@ $"""
     internal bool TryGetAuthenticationGenerator(
         OpenApiOperation operation, 
         ParameterGenerator[] parameters,
-        [NotNullWhen(true)] out AuthenticationGenerator? authenticationGenerator)
+        [NotNullWhen(true)] out SecurityRequirementGenerator? authenticationGenerator)
     {
         var securityRequirementGroups =
             _securitySchemaTranslations.GetSecuritySchemeGroups(operation.Security) ?? _topLevelSecuritySchemeGroups;
@@ -182,7 +182,7 @@ $"""
                     Parameters: parameters.FirstOrDefault(generator => generator.IsSecuritySchemeParameter(scheme.Key)),
                     Scopes: scheme.Value)))
             .ToArray();
-        authenticationGenerator = new AuthenticationGenerator(securitySchemeGroups, _securitySchemaTranslations);
+        authenticationGenerator = new SecurityRequirementGenerator(securitySchemeGroups, _securitySchemaTranslations);
         return true;
     }
 }

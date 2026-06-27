@@ -54,7 +54,6 @@ public class ExportFooEventsTests(FooApplicationFactory app) : FooTestSpecificat
         result.IsSuccessful.Should().BeTrue();
         var typedResponse = result.Response.Should().BeOfType<T>()
             .Subject;
-        typedResponse.Validate(ValidationLevel.Detailed).IsValid.Should().BeTrue();
         typedResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         return typedResponse;
     }

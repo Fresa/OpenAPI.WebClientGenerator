@@ -7,7 +7,7 @@ using Xunit;
 
 namespace OpenAPI.WebClientGenerator.Tests;
 
-public class AuthenticationGeneratorTests(ITestOutputHelper testOutputHelper)
+public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelper)
 {
     private const string SecurityRequirementFile = "Foo.Foo0.Get.SecurityRequirement.g.cs";
 

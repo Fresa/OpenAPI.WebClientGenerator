@@ -8,7 +8,7 @@ internal sealed class OperationGenerator(
     ParameterGenerator[] parameterGenerators,
     RequestBodyGenerator requestBodyGenerator,
     ResponseGenerator responseGenerator,
-    AuthenticationGenerator? authenticationGenerator)
+    SecurityRequirementGenerator? securityRequirementGenerator)
 {
     public HttpMethod Operation { get; } = operation;
     public string OperationClassName { get; } = operation.Method.ToLower().ToPascalCase();
@@ -16,5 +16,5 @@ internal sealed class OperationGenerator(
     public QueryGenerator QueryGenerator { get; } = new(parameterGenerators);
     public HeadersGenerator HeadersGenerator { get; } = new(parameterGenerators);
     public ResponseGenerator ResponseGenerator { get; } = responseGenerator;
-    public AuthenticationGenerator? AuthenticationGenerator { get; } = authenticationGenerator;
+    public SecurityRequirementGenerator? SecurityRequirementGenerator { get; } = securityRequirementGenerator;
 }
