@@ -6,15 +6,15 @@ namespace OpenAPI.WebClientGenerator.CodeGeneration;
 
 internal sealed class EntityGenerator(string name)
 {
-    private readonly Dictionary<string, MethodGenerator> _methodSignatures = new();
+    private readonly Dictionary<int, MethodGenerator> _methodSignatures = new();
     private readonly string _className = name.ToPascalCase();
 
-    internal MethodGenerator AddMethod(string pathExpression, params ParameterGenerator[] parameterGenerators)
+    internal MethodGenerator AddMethod(string pathExpression, params ParameterGenerator[] pathParameterGenerators)
     {
-        var id = parameterGenerators.Aggregate("", (id, generator) => id + generator.FullyQualifiedTypeName);
+        var id = pathParameterGenerators.Length;
         if (_methodSignatures.TryGetValue(id, out var methodGenerator))
             return methodGenerator;
-        methodGenerator = new MethodGenerator(pathExpression, parameterGenerators);
+        methodGenerator = new MethodGenerator(pathExpression, pathParameterGenerators);
         _methodSignatures.Add(id, methodGenerator);
         return methodGenerator;
     }
@@ -35,7 +35,7 @@ internal sealed class EntityGenerator(string name)
         var childEntityChain = outerEntityNames.Append(_className).ToArray();
         foreach (var methodGenerator in _methodSignatures.Values)
         {
-            var entityClassName = _className + methodGenerator.Parameters.Length;
+            var entityClassName = GetEntityClassName(methodGenerator);
             var entityFullyQualifiedName = outerClassNames.Append(entityClassName).ToArray();
 
             foreach (var operation in methodGenerator.Operations)
@@ -43,7 +43,7 @@ internal sealed class EntityGenerator(string name)
                 foreach (var source in operation.ResponseGenerator.Generate(
                     @namespace,
                     nestingClassNames: entityFullyQualifiedName,
-                    className: $"{operation.OperationClassName}Response"))
+                    className: GetResponseTypeName(operation)))
                 {
                     yield return source;
                 }
@@ -74,6 +74,9 @@ internal sealed class EntityGenerator(string name)
         }
     }
 
+    private string GetEntityClassName(MethodGenerator methodGenerator) => 
+        _className + methodGenerator.Parameters.Length;
+
     private static string GetResponseTypeName(OperationGenerator operation) =>
         $"{operation.OperationClassName}Response";
     
@@ -93,10 +96,10 @@ namespace {{@namespace}};
 $$"""
 {{_methodSignatures.Values.AggregateToString(methodGenerator =>
     {
-        var className = _className + methodGenerator.Parameters.Length;
+        var entityClassName = GetEntityClassName(methodGenerator);
         return 
 $$"""
-internal {{className}} {{name}}({{GetMethodParameterList(methodGenerator)}})
+internal {{entityClassName}} {{name}}({{GetMethodParameterList(methodGenerator)}})
 {{{(rootEntity ? 
 """
 
@@ -113,7 +116,7 @@ $$""""
     return new(requestBuilder, {{(rootEntity ? "_" : "")}}configuration);
 }
 
-internal partial class {{className}}(RequestBuilder requestBuilder, WebClientConfiguration configuration)
+internal partial class {{entityClassName}}(RequestBuilder requestBuilder, WebClientConfiguration configuration)
 {{{methodGenerator.Operations.AggregateToString(operation =>
 $$"""
     internal async Task<Result<{{operation.OperationClassName}}Response>> {{operation.OperationClassName}}Async({{
@@ -124,7 +127,7 @@ $$"""
         }}{{(operation.ResponseGenerator.GeneratesContent ? 
 $"""
 
-        Accept? accepts = null,
+        {GetResponseTypeName(operation)}.Accept? accepts = null,
 """ : "")}}
         CancellationToken cancellation = default)
     {{{
@@ -162,27 +165,7 @@ $"""
             ValidationContext.ValidContext;
         return Result<{{GetResponseTypeName(operation)}}>.WithResponse(response, responseValidationContext.Results
             .WithLocation(configuration.OpenApiSpecificationUri));
-    }{{(operation.ResponseGenerator.GeneratesContent ? 
-$$"""
-    
-    internal sealed class Accept
-    {
-        private Accept() {}
-        internal static Accept Content<T>()
-            where T : {{GetResponseTypeName(operation)}}.IAcceptContent =>
-            new Accept().And<T>();
-
-        internal Accept And<T>()
-            where T : {{GetResponseTypeName(operation)}}.IAcceptContent
-        {
-            _mediaTypes.Add(T.MediaType);
-            return this;
-        }
-        
-        private readonly List<MediaTypeWithQualityHeaderValue> _mediaTypes = [];
-        internal MediaTypeWithQualityHeaderValue[] MediaTypes => _mediaTypes.ToArray();
     }
-""" : "")}}
 
 """
 ).TrimEnd()}}
