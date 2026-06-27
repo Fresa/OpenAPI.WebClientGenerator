@@ -25,7 +25,7 @@ public class UpdateFooTests(FooApplicationFactory app) : FooTestSpecification, I
                 },
                 cancellation: CancellationToken);
         result.IsSuccessful.Should().BeTrue();
-        var anyApplicationResponse = result.Response.Should().BeOfType<Foo.Foo.Foo1.PutResponse.OK200.ApplicationJson>()
+        var anyApplicationResponse = result.Response.Should().BeOfType<Foo.Foo.Foo1.Put.Response.OK200.ApplicationJson>()
             .Subject;
         anyApplicationResponse.Content.Name
             .Should().NotBeNull()

@@ -5,36 +5,33 @@ using OpenAPI.WebClientGenerator.Extensions;
 namespace OpenAPI.WebClientGenerator.CodeGeneration;
 
 internal sealed class ResponseGenerator(
-    List<ResponseContentGenerator> responseContentGenerators
-    )
+    List<ResponseContentGenerator> responseContentGenerators)
 {
+    internal const string ClassName = "Response"; 
     internal bool GeneratesContent { get; } = responseContentGenerators.Any(generator => generator.HasBodies);
     
     public IEnumerable<SourceCode> Generate(
         string @namespace,
-        IReadOnlyList<string> nestingClassNames,
-        string className)
+        IReadOnlyList<string> nestingClassNames)
     {
-        yield return GenerateBaseClass(@namespace, nestingClassNames, className);
-        yield return GenerateUnknown(@namespace, nestingClassNames, className);
+        yield return GenerateBaseClass(@namespace, nestingClassNames);
+        var responseNestingClassNames = nestingClassNames.Append(ClassName).ToArray();
+        yield return GenerateUnknown(@namespace, responseNestingClassNames);
         if (GeneratesContent)
         {
-            yield return GenerateAccept(@namespace, nestingClassNames, className);
+            yield return GenerateAccept(@namespace, responseNestingClassNames);
         }
-        foreach (var generator in responseContentGenerators)
+        foreach (var source in responseContentGenerators.SelectMany(generator => 
+                     generator.Generate(@namespace, responseNestingClassNames)))
         {
-            foreach (var source in generator.Generate(@namespace, nestingClassNames, className))
-            {
-                yield return source;
-            }
+            yield return source;
         }
     }
 
     private SourceCode GenerateBaseClass(
         string @namespace,
-        IReadOnlyList<string> nestingClassNames,
-        string className) =>
-        new($"{string.Join(".", nestingClassNames)}.{className}.g.cs",
+        IReadOnlyList<string> nestingClassNames) =>
+        new($"{string.Join(".", nestingClassNames)}.{ClassName}.g.cs",
 $$"""
 #nullable enable
 using Corvus.Json;
@@ -49,7 +46,7 @@ $$"""
 /// <summary>
 /// Contains the operation's response objects
 /// </summary>
-internal abstract partial class {{className}}
+internal abstract partial class {{ClassName}}
 {{{Enumerable.Range(1, 5).AggregateToStringAsIs(i =>
 $$"""
 
@@ -88,13 +85,13 @@ $$"""
     /// <param name="response">Response message</param>
     /// <param name="configuration">Web client configuration</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    internal static Task<{{className}}> BindAsync(HttpResponseMessage response, WebClientConfiguration configuration, CancellationToken cancellationToken = default) =>
+    internal static Task<{{ClassName}}> BindAsync(HttpResponseMessage response, WebClientConfiguration configuration, CancellationToken cancellationToken = default) =>
         response.StatusCode switch
         {{{responseContentGenerators.AggregateToString(generator =>
 $"""
             _ when {generator.ClassName}.MatchesStatusCode(response.StatusCode) => {generator.ClassName}.BindAsync(response, configuration, cancellationToken),
 """)}}
-            _ => {{className}}.Unknown.BindAsync(response, cancellationToken)
+            _ => {{ClassName}}.Unknown.BindAsync(response, cancellationToken)
         };{{(GeneratesContent ? 
 """
 
@@ -111,26 +108,25 @@ $"""
 
     private static SourceCode GenerateAccept(
         string @namespace,
-        IReadOnlyList<string> nestingClassNames,
-        string className) =>
-        new($"{string.Join(".", nestingClassNames)}.{className}.Accept.g.cs",
+        IReadOnlyList<string> nestingClassNames) =>
+        new($"{string.Join(".", nestingClassNames)}.Accept.g.cs",
 $$"""
 #nullable enable
 using System.Collections.Generic;
 using System.Net.Http.Headers;
 
 namespace {{@namespace}};
-{{NestedClassGenerator.Wrap(nestingClassNames.Append(className).ToArray(), () =>
+{{NestedClassGenerator.Wrap(nestingClassNames, () =>
 $$"""
 internal sealed class Accept
 {
     private Accept() {}
     internal static Accept Content<T>()
-        where T : {{className}}.IAcceptContent =>
+        where T : {{ClassName}}.IAcceptContent =>
         new Accept().And<T>();
 
     internal Accept And<T>()
-        where T : {{className}}.IAcceptContent
+        where T : {{ClassName}}.IAcceptContent
     {
         _mediaTypes.Add(T.MediaType);
         return this;
@@ -145,21 +141,20 @@ internal sealed class Accept
 
     private static SourceCode GenerateUnknown(
         string @namespace,
-        IReadOnlyList<string> nestingClassNames,
-        string className) =>
-        new($"{string.Join(".", nestingClassNames)}.{className}.Unknown.g.cs",
+        IReadOnlyList<string> nestingClassNames) =>
+        new($"{string.Join(".", nestingClassNames)}.Unknown.g.cs",
 $$"""
 #nullable enable
 using Corvus.Json;
 using System.Net;
 
 namespace {{@namespace}};
-{{NestedClassGenerator.Wrap(nestingClassNames.Append(className).ToArray(), () =>
+{{NestedClassGenerator.Wrap(nestingClassNames, () =>
 $$"""
 /// <summary>
 /// Unknown response
 /// </summary>
-internal sealed class Unknown : {{className}}
+internal sealed class Unknown : {{ClassName}}
 {
     internal Stream Content { get; }
 
@@ -174,7 +169,7 @@ internal sealed class Unknown : {{className}}
     /// </summary>
     /// <param name="response">Response message</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    internal static async Task<{{className}}> BindAsync(HttpResponseMessage response, CancellationToken cancellationToken = default)
+    internal static async Task<{{ClassName}}> BindAsync(HttpResponseMessage response, CancellationToken cancellationToken = default)
     {
         var stream = await response.Content.ReadAsStreamAsync(cancellationToken)
             .ConfigureAwait(false);

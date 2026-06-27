@@ -12,6 +12,6 @@ public class DeleteFooTests(FooApplicationFactory app) : FooTestSpecification, I
         var result = await client.Foo_(10)
             .DeleteAsync(CancellationToken);
         result.IsSuccessful.Should().BeTrue();
-        result.Response.Should().BeOfType<Foo.Foo.Foo1.DeleteResponse.OK200.Empty>();
+        result.Response.Should().BeOfType<Foo.Foo.Foo1.Delete.Response.OK200.Empty>();
     }
 }

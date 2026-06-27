@@ -27,7 +27,7 @@ public class UpdateFooTests(FooApplicationFactory app) : FooTestSpecification, I
                 },
                 cancellation: CancellationToken);
         result.IsSuccessful.Should().BeTrue();
-        var anyApplicationResponse = result.Response.Should().BeOfType<Foo.Foo.Foo1.PutResponse.OK200.AnyApplication>()
+        var anyApplicationResponse = result.Response.Should().BeOfType<Foo.Foo.Foo1.Put.Response.OK200.AnyApplication>()
             .Subject;
         anyApplicationResponse.Content.Name
             .Should().NotBeNull()
@@ -73,7 +73,7 @@ public class UpdateFooTests(FooApplicationFactory app) : FooTestSpecification, I
         schemaLocations.Should().ContainEquivalentOf(new JsonReference("#/paths/~1foo~1{FooId}/put/responses/200/headers/Status/schema/type"));
         schemaLocations.Should().ContainEquivalentOf(new JsonReference("#/components/schemas/FooProperties/properties/Name/type"));
 
-        result.Response.Should().BeOfType<Foo.Foo.Foo1.PutResponse.OK200.AnyApplication>();
+        result.Response.Should().BeOfType<Put.Response.OK200.AnyApplication>();
     }
     
     //

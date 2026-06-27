@@ -40,17 +40,16 @@ internal sealed class EntityGenerator(string name)
 
             foreach (var operation in methodGenerator.Operations)
             {
+                var operationFullyQualifiedName = 
+                    entityFullyQualifiedName.Append(operation.OperationClassName)
+                        .ToArray(); 
                 foreach (var source in operation.ResponseGenerator.Generate(
-                    @namespace,
-                    nestingClassNames: entityFullyQualifiedName,
-                    className: GetResponseTypeName(operation)))
+                             @namespace,
+                             nestingClassNames: operationFullyQualifiedName))
                 {
                     yield return source;
                 }
 
-                var operationFullyQualifiedName = 
-                    entityFullyQualifiedName.Append(operation.OperationClassName)
-                        .ToArray(); 
                 if (operation.AuthenticationGenerator is not null)
                 {
                     yield return operation.AuthenticationGenerator.Generate(
@@ -78,7 +77,7 @@ internal sealed class EntityGenerator(string name)
         _className + methodGenerator.Parameters.Length;
 
     private static string GetResponseTypeName(OperationGenerator operation) =>
-        $"{operation.OperationClassName}Response";
+        $"{operation.OperationClassName}.{ResponseGenerator.ClassName}";
     
     private string GenerateClass(string @namespace, IReadOnlyList<string> nestedClassNames, bool rootEntity = false)
     {
@@ -119,7 +118,7 @@ $$""""
 internal partial class {{entityClassName}}(RequestBuilder requestBuilder, WebClientConfiguration configuration)
 {{{methodGenerator.Operations.AggregateToString(operation =>
 $$"""
-    internal async Task<Result<{{operation.OperationClassName}}Response>> {{operation.OperationClassName}}Async({{
+    internal async Task<Result<{{GetResponseTypeName(operation)}}>> {{operation.OperationClassName}}Async({{
         GetParameterArgumentExpressions(operation)
             .AggregateToString()
             .Indent(8)

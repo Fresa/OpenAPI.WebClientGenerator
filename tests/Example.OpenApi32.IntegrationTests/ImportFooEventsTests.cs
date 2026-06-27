@@ -82,7 +82,7 @@ public class ImportFooEventsTests(FooApplicationFactory app) : FooTestSpecificat
         var client = new Foo.Foo(httpClient);
         var result = await client.Foo_(1).Events().PostAsync(content, cancellation: CancellationToken);
         result.IsSuccessful.Should().BeTrue();
-        var typedResponse = result.Response.Should().BeOfType<Foo.Foo.Foo1.Events0.PostResponse.Accepted202.Empty>()
+        var typedResponse = result.Response.Should().BeOfType<Foo.Foo.Foo1.Events0.Post.Response.Accepted202.Empty>()
             .Subject;
         typedResponse.StatusCode.Should().Be(HttpStatusCode.Accepted);
         typedResponse.Headers.ImportedEvents.Should().Be(new JsonInteger(2));

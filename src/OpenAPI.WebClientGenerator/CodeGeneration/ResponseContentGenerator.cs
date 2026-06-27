@@ -62,29 +62,27 @@ internal sealed class ResponseContentGenerator
 
     public IEnumerable<SourceCode> Generate(
         string @namespace,
-        IReadOnlyList<string> nestingClassNames,
-        string baseClassName)
+        IReadOnlyList<string> responseClassNameHierarchy)
     {
-        yield return GenerateBaseClass(@namespace, nestingClassNames, baseClassName);
+        yield return GenerateBaseClass(@namespace, responseClassNameHierarchy);
         if (_contentGenerators.Any())
         {
-            yield return GenerateUnknownContent(@namespace, nestingClassNames, baseClassName);
+            yield return GenerateUnknownContent(@namespace, responseClassNameHierarchy);
             foreach (var content in _contentGenerators)
             {
-                yield return content.GenerateContent(@namespace, nestingClassNames.Append(baseClassName).ToArray(), ClassName);
+                yield return content.GenerateContent(@namespace, responseClassNameHierarchy, ClassName);
             }
         }
         else
         {
-            yield return GenerateEmptyContent(@namespace, nestingClassNames, baseClassName);
+            yield return GenerateEmptyContent(@namespace, responseClassNameHierarchy);
         }
     }
 
     private SourceCode GenerateBaseClass(
         string @namespace,
-        IReadOnlyList<string> nestingClassNames,
-        string baseClassName) =>
-        new($"{string.Join(".", nestingClassNames)}.{baseClassName}.{ClassName}.g.cs",
+        IReadOnlyList<string> nestingClassNames) =>
+        new($"{string.Join(".", nestingClassNames)}.{ClassName}.g.cs",
 $$"""
 #nullable enable
 using Corvus.Json;
@@ -93,10 +91,10 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 
 namespace {{@namespace}};
-{{NestedClassGenerator.Wrap(nestingClassNames.Append(baseClassName).ToArray(), () =>
+{{NestedClassGenerator.Wrap(nestingClassNames, () =>
 $$"""
 {{_response.Description.AsComment("summary", "para")}}
-internal abstract partial class {{ClassName}} : {{baseClassName}}
+internal abstract partial class {{ClassName}} : {{nestingClassNames.Last()}}
 {
     protected {{ClassName}}(HttpResponseMessage response)
     {
@@ -161,7 +159,7 @@ $"""
     /// <param name="configuration">Web client configuration</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>An awaitable task for the response content</returns>
-    internal new static Task<{{baseClassName}}> BindAsync(HttpResponseMessage response, WebClientConfiguration configuration, CancellationToken cancellationToken = default)
+    internal new static Task<{{nestingClassNames.Last()}}> BindAsync(HttpResponseMessage response, WebClientConfiguration configuration, CancellationToken cancellationToken = default)
     {
 {{(_contentGenerators.Any() ?
 $$"""
@@ -204,15 +202,14 @@ $"""
 
     private SourceCode GenerateEmptyContent(
         string @namespace,
-        IReadOnlyList<string> nestingClassNames,
-        string baseClassName) =>
-        new($"{string.Join(".", nestingClassNames)}.{baseClassName}.{ClassName}.Empty.g.cs",
+        IReadOnlyList<string> nestingClassNames) =>
+        new($"{string.Join(".", nestingClassNames)}.{ClassName}.Empty.g.cs",
 $$"""
 #nullable enable
 using Corvus.Json;
 
 namespace {{@namespace}};
-{{NestedClassGenerator.Wrap(nestingClassNames.Append(baseClassName).Append(ClassName).ToArray(), () =>
+{{NestedClassGenerator.Wrap(nestingClassNames.Append(ClassName).ToArray(), () =>
 $$"""
 /// <summary>
 /// Response with empty content
@@ -228,8 +225,8 @@ internal sealed class Empty : {{ClassName}}
     /// </summary>
     /// <param name="response">Response message</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    internal static Task<{{baseClassName}}> BindAsync(HttpResponseMessage response, CancellationToken cancellationToken = default) =>
-        Task.FromResult<{{baseClassName}}>(new Empty(response));
+    internal static Task<{{nestingClassNames.Last()}}> BindAsync(HttpResponseMessage response, CancellationToken cancellationToken = default) =>
+        Task.FromResult<{{nestingClassNames.Last()}}>(new Empty(response));
 
     /// <inheritdoc/>
     internal override ValidationContext Validate(ValidationLevel validationLevel) =>
@@ -241,15 +238,14 @@ internal sealed class Empty : {{ClassName}}
 
     private SourceCode GenerateUnknownContent(
         string @namespace,
-        IReadOnlyList<string> nestingClassNames,
-        string baseClassName) =>
-        new($"{string.Join(".", nestingClassNames)}.{baseClassName}.{ClassName}.Unknown.g.cs",
+        IReadOnlyList<string> nestingClassNames) =>
+        new($"{string.Join(".", nestingClassNames)}.{ClassName}.Unknown.g.cs",
 $$"""
 #nullable enable
 using Corvus.Json;
 
 namespace {{@namespace}};
-{{NestedClassGenerator.Wrap(nestingClassNames.Append(baseClassName).Append(ClassName).ToArray(), () =>
+{{NestedClassGenerator.Wrap(nestingClassNames.Append(ClassName).ToArray(), () =>
 $$"""
 /// <summary>
 /// Response for unknown content
@@ -268,7 +264,7 @@ internal new sealed class Unknown : {{ClassName}}
     /// </summary>
     /// <param name="response">Response message</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    internal static async Task<{{baseClassName}}> BindAsync(HttpResponseMessage response, CancellationToken cancellationToken = default)
+    internal static async Task<{{nestingClassNames.Last()}}> BindAsync(HttpResponseMessage response, CancellationToken cancellationToken = default)
     {
         var stream = await response.Content.ReadAsStreamAsync(cancellationToken)
             .ConfigureAwait(false);
