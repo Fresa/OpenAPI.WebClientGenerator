@@ -200,4 +200,40 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
 
         generatedFiles.Should().NotContain(SecurityRequirementFile);
     }
+    
+    [Fact]
+    public void OperationWithEmptySecurityRequirement_GenerateAnonymousRequirement()
+    {
+        var source = Generate(
+            "",
+            operationSecurity: 
+            """
+            "security": [ {} ],
+            """,
+            out _);
+
+        source.Should().Be(
+            """
+            #nullable enable
+            namespace Example;
+            internal partial class Foo
+            {
+                internal partial class Foo0
+                {
+                    internal partial class Get
+                    {
+                        internal abstract partial class SecurityRequirement
+                        {
+                            internal sealed partial class Anonymous : SecurityRequirement
+                            {
+                                internal override void AddTo(RequestBuilder requestBuilder) { }
+                            }
+                            internal abstract void AddTo(RequestBuilder requestBuilder);
+                        }
+                    }
+                }
+            }
+            #nullable restore
+            """);
+    }
 }

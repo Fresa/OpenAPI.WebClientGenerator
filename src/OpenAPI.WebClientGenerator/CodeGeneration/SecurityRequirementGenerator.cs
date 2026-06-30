@@ -6,81 +6,97 @@ using OpenAPI.WebClientGenerator.Extensions;
 
 namespace OpenAPI.WebClientGenerator.CodeGeneration;
 
-internal sealed class SecurityRequirementGenerator(Dictionary<OpenApiSecuritySchemeReference, (ParameterGenerator Parameters, List<string> Scopes)>[] securityRequirementObjects, SecuritySchemaTranslations securitySchemaTranslations)
+internal sealed class SecurityRequirementGenerator(
+    Dictionary<OpenApiSecuritySchemeReference, (ParameterGenerator Parameters, List<string> Scopes)>[]
+        securityRequirementObjects,
+    SecuritySchemaTranslations securitySchemaTranslations)
 {
     internal SourceCode Generate(string @namespace, IReadOnlyList<string> nestingClassNames) =>
         new($"{string.Join(".", nestingClassNames)}.SecurityRequirement.g.cs",
-$$"""
-#nullable enable
-namespace {{@namespace}};
-{{NestedClassGenerator.Wrap(nestingClassNames, GenerateClass)}}
-#nullable restore
-""");
+            $$"""
+              #nullable enable
+              namespace {{@namespace}};
+              {{NestedClassGenerator.Wrap(nestingClassNames, GenerateClass)}}
+              #nullable restore
+              """);
 
     private string GenerateClass() =>
-$$"""
-internal abstract partial class SecurityRequirement
-{{{securityRequirementObjects.AggregateToString(securityRequirementObject =>
-    securityRequirementObject.Count == 1
-        ? GenerateSingleSchemeRequirement(securityRequirementObject)
-        : GenerateMultiSchemeRequirement(securityRequirementObject))}}
-    internal abstract void AddTo(RequestBuilder requestBuilder);
-}
-""";
+        $$"""
+          internal abstract partial class SecurityRequirement
+          {{{securityRequirementObjects.AggregateToString(securityRequirementObject =>
+              securityRequirementObject.Count switch
+              {
+                  0 => GenerateAnonymous(),
+                  1 => GenerateSingleSchemeRequirement(securityRequirementObject),
+                  _ => GenerateMultiSchemeRequirement(securityRequirementObject)
+              })}}
+              internal abstract void AddTo(RequestBuilder requestBuilder);
+          }
+          """;
+
+    private string GenerateAnonymous() =>
+        """
+            internal sealed partial class Anonymous : SecurityRequirement
+            {
+                internal override void AddTo(RequestBuilder requestBuilder) { }
+            }
+        """;
 
     private string GenerateSingleSchemeRequirement(
-        Dictionary<OpenApiSecuritySchemeReference, (ParameterGenerator Parameters, List<string> Scopes)> securityRequirementObject)
+        Dictionary<OpenApiSecuritySchemeReference, (ParameterGenerator Parameters, List<string> Scopes)>
+            securityRequirementObject)
     {
-        var className = GetAuthenticationClassName(securityRequirementObject);
+        var className = GetSecurityRequirementsClassName(securityRequirementObject);
         var schemeReference = securityRequirementObject.Single().Key;
         var schemeClassName = securitySchemaTranslations.GetSecuritySchemeName(schemeReference).ToPascalCase();
         var constructorArguments = schemeReference.GetSchemeConstructorArguments();
         return
-$$"""
-    internal sealed partial class {{className}} : SecurityRequirement
-    {
-        private readonly SecuritySchemes.{{schemeClassName}} _scheme;
+            $$"""
+                  internal sealed partial class {{className}} : SecurityRequirement
+                  {
+                      private readonly SecuritySchemes.{{schemeClassName}} _scheme;
 
-        internal {{className}}({{constructorArguments.GetMethodParameterList()}}) =>
-            _scheme = new SecuritySchemes.{{schemeClassName}}({{constructorArguments.GetMethodArgumentList()}});
+                      internal {{className}}({{constructorArguments.GetMethodParameterList()}}) =>
+                          _scheme = new SecuritySchemes.{{schemeClassName}}({{constructorArguments.GetMethodArgumentList()}});
 
-        internal override void AddTo(RequestBuilder requestBuilder) => _scheme.AddTo(requestBuilder);
-    }
-""";
+                      internal override void AddTo(RequestBuilder requestBuilder) => _scheme.AddTo(requestBuilder);
+                  }
+              """;
     }
 
     private string GenerateMultiSchemeRequirement(
-        Dictionary<OpenApiSecuritySchemeReference, (ParameterGenerator Parameters, List<string> Scopes)> securityRequirementObject)
+        Dictionary<OpenApiSecuritySchemeReference, (ParameterGenerator Parameters, List<string> Scopes)>
+            securityRequirementObject)
     {
-        var className = GetAuthenticationClassName(securityRequirementObject);
+        var className = GetSecurityRequirementsClassName(securityRequirementObject);
         return
-$$"""
-    internal sealed partial class {{className}} : SecurityRequirement
-    {{{securityRequirementObject.AggregateToString(securityRequirement =>
-        {
-            var schemeClassName = securitySchemaTranslations.GetSecuritySchemeName(securityRequirement.Key).ToPascalCase();
-            return
-$$"""
-        internal required SecuritySchemes.{{schemeClassName}} {{schemeClassName}} { init; get; }
-""";
-        })}}
+            $$"""
+                  internal sealed partial class {{className}} : SecurityRequirement
+                  {{{securityRequirementObject.AggregateToString(securityRequirement =>
+                  {
+                      var schemeClassName = securitySchemaTranslations.GetSecuritySchemeName(securityRequirement.Key).ToPascalCase();
+                      return
+                          $$"""
+                                    internal required SecuritySchemes.{{schemeClassName}} {{schemeClassName}} { init; get; }
+                            """;
+                  })}}
 
-        internal override void AddTo(RequestBuilder requestBuilder)
-        {{{securityRequirementObject.AggregateToString(securityRequirement =>
-        {
-            var schemeClassName = securitySchemaTranslations.GetSecuritySchemeName(securityRequirement.Key).ToPascalCase();
-            return
-$$"""
-            {{schemeClassName}}.AddTo(requestBuilder);
-""";
-        })}}
-        }
-    }
-""";
+                      internal override void AddTo(RequestBuilder requestBuilder)
+                      {{{securityRequirementObject.AggregateToString(securityRequirement =>
+                      {
+                          var schemeClassName = securitySchemaTranslations.GetSecuritySchemeName(securityRequirement.Key).ToPascalCase();
+                          return
+                              $$"""
+                                            {{schemeClassName}}.AddTo(requestBuilder);
+                                """;
+                      })}}
+                      }
+                  }
+              """;
     }
 
     private readonly HashSet<string> _requirementGroupNames = [];
-    private string GetAuthenticationClassName(
+    private string GetSecurityRequirementsClassName(
         Dictionary<OpenApiSecuritySchemeReference, (ParameterGenerator Parameters, List<string> Scopes)>
             securityRequirementObject)
     {

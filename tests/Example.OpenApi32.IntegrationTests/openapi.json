@@ -60,6 +60,7 @@
           }
         },
         "security": [
+          {},
           {"petstore_auth": ["update"]},
           {"secret_key": []},
           {"basicAuth": []},
