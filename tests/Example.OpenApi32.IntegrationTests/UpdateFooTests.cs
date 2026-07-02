@@ -27,7 +27,7 @@ public class UpdateFooTests(FooApplicationFactory app) : FooTestSpecification, I
                 },
                 cancellation: CancellationToken);
         result.IsSuccessful.Should().BeTrue();
-        var anyApplicationResponse = result.Response.Should().BeOfType<Foo.Foo.Foo1.Put.Response.OK200.AnyApplication>()
+        var anyApplicationResponse = result.Response.Should().BeOfType<Put.Response.OK200.AnyApplication>()
             .Subject;
         anyApplicationResponse.Content.Name
             .Should().NotBeNull()
@@ -75,47 +75,6 @@ public class UpdateFooTests(FooApplicationFactory app) : FooTestSpecification, I
 
         result.Response.Should().BeOfType<Put.Response.OK200.AnyApplication>();
     }
-    
-    //
-    // [Fact]
-    // public async Task Given_unauthenticated_request_When_Updating_Foo_It_Should_Return_401()
-    // {
-    //     using var httpClient = app.CreateClient();
-    //     var client = CreateClient(httpClient);
-    //
-    //     var responseHandler = new NativeResponseHandler();
-    //     await client.Foo[1].PutAsync(
-    //         new FooProperties { Name = "test" },
-    //         config =>
-    //         {
-    //             config.Headers.Add("Bar", "test");
-    //             config.Options.Add(new ResponseHandlerOption { ResponseHandler = responseHandler });
-    //         },
-    //         CancellationToken);
-    //     var result = (HttpResponseMessage)responseHandler.Value;
-    //
-    //     result.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
-    // }
-    //
-    // [Fact]
-    // public async Task Given_unauthorized_request_When_Updating_Foo_It_Should_Return_403()
-    // {
-    //     using var httpClient = app.CreateClient().WithOAuth2ImplicitFlowAuthentication();
-    //     var client = CreateClient(httpClient);
-    //
-    //     var responseHandler = new NativeResponseHandler();
-    //     await client.Foo[1].PutAsync(
-    //         new FooProperties { Name = "test" },
-    //         config =>
-    //         {
-    //             config.Headers.Add("Bar", "test");
-    //             config.Options.Add(new ResponseHandlerOption { ResponseHandler = responseHandler });
-    //         },
-    //         CancellationToken);
-    //     var result = (HttpResponseMessage)responseHandler.Value;
-    //
-    //     result.StatusCode.Should().Be(HttpStatusCode.Forbidden);
-    // }
 
     private sealed class StubHandler(Func<HttpRequestMessage, HttpResponseMessage> respond) : HttpMessageHandler
     {

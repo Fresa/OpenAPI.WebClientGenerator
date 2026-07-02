@@ -38,48 +38,4 @@ public class UpdateFooTests(FooApplicationFactory app) : FooTestSpecification, I
         //     .And.Contain("2");
         // result.Content.Headers.ContentType.Should().Be(MediaTypeHeaderValue.Parse("application/json"));
     }
-
-    // [Fact]
-    // public async Task Given_unauthenticated_request_When_Updating_Foo_It_Should_Return_401()
-    // {
-    //     using var client = app.CreateClient();
-    //     var result = await client.SendAsync(new HttpRequestMessage()
-    //     {
-    //         RequestUri = new Uri(client.BaseAddress!, "/foo/1"),
-    //         Method = new HttpMethod("PUT"),
-    //         Content = CreateJsonContent(
-    //             """
-    //             {
-    //                 "Name": "test"
-    //             }
-    //             """),
-    //         Headers =
-    //         {
-    //             { "Bar", "test" }
-    //         }
-    //     }, CancellationToken);
-    //     result.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
-    // }
-    //
-    // [Fact]
-    // public async Task Given_unauthorized_request_When_Updating_Foo_It_Should_Return_403()
-    // {
-    //     using var client = app.CreateClient().WithOAuth2ImplicitFlowAuthentication();
-    //     var result = await client.SendAsync(new HttpRequestMessage()
-    //     {
-    //         RequestUri = new Uri(client.BaseAddress!, "/foo/1"),
-    //         Method = new HttpMethod("PUT"),
-    //         Content = CreateJsonContent(
-    //             """
-    //             {
-    //                 "Name": "test"
-    //             }
-    //             """),
-    //         Headers =
-    //         {
-    //             { "Bar", "test" }
-    //         }
-    //     }, CancellationToken);
-    //     result.StatusCode.Should().Be(HttpStatusCode.Forbidden);
-    // }
 }
