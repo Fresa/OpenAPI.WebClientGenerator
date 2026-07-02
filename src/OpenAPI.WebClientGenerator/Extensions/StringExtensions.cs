@@ -6,7 +6,7 @@ namespace OpenAPI.WebClientGenerator.Extensions;
 
 internal static class StringExtensions
 {
-    private static readonly char[] DefaultDelimiters = ['/', '?', '=', '&', '{', '}', '-', '_', '+'];
+    private static readonly char[] DefaultDelimiters = ['/', '?', '=', '&', '{', '}', '-', '_', '+', ':'];
     
     [return: NotNullIfNotNull(nameof(str))]
     public static string? ToPascalCase(this string? str, params char[] delimiters)
