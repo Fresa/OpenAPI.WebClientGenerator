@@ -54,14 +54,14 @@ internal sealed partial class Anonymous : SecurityRequirement
         var className = GetSecurityRequirementsClassName(securityRequirementObject);
         var schemeReference = securityRequirement.Key;
         var scopes = securityRequirement.Value.Scopes; 
-        var schemeClassName = securitySchemaTranslations.GetSecuritySchemeName(schemeReference).ToPascalCase();
+        var schemeClassName = GetSecurityRequirementClassName(schemeReference);
         var constructorArguments = schemeReference.GetSchemeConstructorArguments();
         return
 $$"""
 internal sealed partial class {{className}} : SecurityRequirement
-{{{(scopes.Any() ? 
+{{{(scopes.Any() ?
 $$"""
-    
+
     internal static class Scopes
     {{{scopes.AggregateToString(scope => 
 $"""
@@ -85,12 +85,34 @@ $"""
             securityRequirementObject)
     {
         var className = GetSecurityRequirementsClassName(securityRequirementObject);
+        var scopesPerSecurityRequirement =
+            securityRequirementObject
+                .Where(pair => pair.Value.Scopes.Any())
+                .ToDictionary(pair => GetSecurityRequirementClassName(pair.Key),
+                    pair => pair.Value.Scopes);
         return
 $$"""
 internal sealed partial class {{className}} : SecurityRequirement
-{{{securityRequirementObject.AggregateToString(securityRequirement =>
+{{{(scopesPerSecurityRequirement.Any() ?
+$$"""
+
+    internal static class Scopes
+    {{{scopesPerSecurityRequirement.AggregateToString(securityRequirement =>
+$$"""
+        internal static class {{securityRequirement.Key}}
+        {{{securityRequirement.Value.AggregateToString(scope =>
+$"""
+            internal const string {scope.ToPascalCase()} = "{scope}";
+""")}}
+        }
+
+"""
+    )}}
+    }
+
+""" : "")}}{{securityRequirementObject.AggregateToString(securityRequirement =>
 {
-  var schemeClassName = securitySchemaTranslations.GetSecuritySchemeName(securityRequirement.Key).ToPascalCase();
+  var schemeClassName = GetSecurityRequirementClassName(securityRequirement.Key);
   return
 $$"""
     internal required SecuritySchemes.{{schemeClassName}} {{schemeClassName}} { init; get; }
@@ -100,7 +122,7 @@ $$"""
     internal override void AddTo(RequestBuilder requestBuilder)
     {{{securityRequirementObject.AggregateToString(securityRequirement =>
     {
-        var schemeClassName = securitySchemaTranslations.GetSecuritySchemeName(securityRequirement.Key).ToPascalCase();
+        var schemeClassName = GetSecurityRequirementClassName(securityRequirement.Key);
         return
 $$"""
         {{schemeClassName}}.AddTo(requestBuilder);
@@ -118,7 +140,7 @@ $$"""
     {
         var name = 
             string.Join("And", securityRequirementObject.Keys
-                .Select(reference => securitySchemaTranslations.GetSecuritySchemeName(reference).ToPascalCase())
+                .Select(GetSecurityRequirementClassName)
                 .OrderBy(name => name));
         var i = 1;
         while (!_requirementGroupNames.Add(name))
@@ -129,4 +151,6 @@ $$"""
 
         return name;
     }
+
+    private string GetSecurityRequirementClassName(OpenApiSecuritySchemeReference openApiSecuritySchemeReference) => securitySchemaTranslations.GetSecuritySchemeName(openApiSecuritySchemeReference).ToPascalCase();
 }

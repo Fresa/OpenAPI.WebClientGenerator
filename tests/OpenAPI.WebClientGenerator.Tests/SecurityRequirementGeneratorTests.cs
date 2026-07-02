@@ -206,6 +206,134 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
     }
     
     [Fact]
+    public void OperationWithMultipleSchemes_GeneratesScopesPerScopedScheme()
+    {
+        var source = Generate(
+            """
+            "ApiKeyAuth": { "type": "apiKey", "in": "header", "name": "X-API-Key" },
+            "OAuth2": {
+              "type": "oauth2",
+              "flows": {
+                "authorizationCode": {
+                  "authorizationUrl": "https://example.com/auth",
+                  "tokenUrl": "https://example.com/token",
+                  "scopes": {
+                    "read:foo": "Read foo",
+                    "write:foo": "Write foo"
+                  }
+                }
+              }
+            }
+            """,
+            """
+            "security": [ { "ApiKeyAuth": [], "OAuth2": [ "read:foo", "write:foo" ] } ],
+            """,
+            out _);
+
+        source.Should().Be(
+            """"
+            #nullable enable
+            namespace Example;
+            internal partial class Foo
+            {
+                internal partial class Foo0
+                {
+                    internal partial class Get
+                    {
+                        internal abstract partial class SecurityRequirement
+                        {
+                            internal sealed partial class ApiKeyAuthAndOAuth2 : SecurityRequirement
+                            {
+                                internal static class Scopes
+                                {
+                                    internal static class OAuth2
+                                    {
+                                        internal const string ReadFoo = "read:foo";
+                                        internal const string WriteFoo = "write:foo";
+                                    }
+                                }
+
+                                internal required SecuritySchemes.ApiKeyAuth ApiKeyAuth { init; get; }
+                                internal required SecuritySchemes.OAuth2 OAuth2 { init; get; }
+
+                                internal override void AddTo(RequestBuilder requestBuilder)
+                                {
+                                    ApiKeyAuth.AddTo(requestBuilder);
+                                    OAuth2.AddTo(requestBuilder);
+                                }
+                            }
+
+                            internal abstract void AddTo(RequestBuilder requestBuilder);
+                        }
+                    }
+                }
+            }
+            #nullable restore
+            """");
+    }
+
+    [Fact]
+    public void OperationWithScopedScheme_GeneratesScopesForTheOperation()
+    {
+        var source = Generate(
+            """
+            "OAuth2": {
+              "type": "oauth2",
+              "flows": {
+                "authorizationCode": {
+                  "authorizationUrl": "https://example.com/auth",
+                  "tokenUrl": "https://example.com/token",
+                  "scopes": {
+                    "read:foo": "Read foo",
+                    "write:foo": "Write foo"
+                  }
+                }
+              }
+            }
+            """,
+            """
+            "security": [ { "OAuth2": [ "read:foo", "write:foo" ] } ],
+            """,
+            out _);
+
+        source.Should().Be(
+            """"
+            #nullable enable
+            namespace Example;
+            internal partial class Foo
+            {
+                internal partial class Foo0
+                {
+                    internal partial class Get
+                    {
+                        internal abstract partial class SecurityRequirement
+                        {
+                            internal sealed partial class OAuth2 : SecurityRequirement
+                            {
+                                internal static class Scopes
+                                {
+                                    internal const string ReadFoo = "read:foo";
+                                    internal const string WriteFoo = "write:foo";
+                                }
+
+                                private readonly SecuritySchemes.OAuth2 _scheme;
+
+                                internal OAuth2(string token) =>
+                                    _scheme = new SecuritySchemes.OAuth2(token);
+
+                                internal override void AddTo(RequestBuilder requestBuilder) => _scheme.AddTo(requestBuilder);
+                            }
+
+                            internal abstract void AddTo(RequestBuilder requestBuilder);
+                        }
+                    }
+                }
+            }
+            #nullable restore
+            """");
+    }
+
+    [Fact]
     public void OperationWithEmptySecurityRequirement_GenerateAnonymousRequirement()
     {
         var source = Generate(
