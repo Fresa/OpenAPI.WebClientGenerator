@@ -25,16 +25,13 @@ public class UpdateFooTests(FooApplicationFactory app) : FooTestSpecification, I
                 },
                 cancellation: CancellationToken);
         result.IsSuccessful.Should().BeTrue();
-        var anyApplicationResponse = result.Response.Should().BeOfType<Foo.Foo.Foo1.Put.Response.OK200.ApplicationJson>()
+        var anyApplicationResponse = result.Response.Should().BeOfType<Put.Response.OK200.ApplicationJson>()
             .Subject;
         anyApplicationResponse.Content.Name
             .Should().NotBeNull()
             .And.Be(new JsonString("test"));
-        
-        // result.Headers.Should().HaveCount(1);
-        // result.Headers.Should().ContainKey("Status")
-        //     .WhoseValue.Should().HaveCount(1)
-        //     .And.Contain("2");
-        // result.Content.Headers.ContentType.Should().Be(MediaTypeHeaderValue.Parse("application/json"));
+
+        anyApplicationResponse.Headers.Status.Should().Be(new JsonInteger(2));
+        anyApplicationResponse.Headers.Tag.Should().BeNull();
     }
 }
