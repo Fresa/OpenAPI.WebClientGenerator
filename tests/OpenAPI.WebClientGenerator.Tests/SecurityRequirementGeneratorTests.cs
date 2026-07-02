@@ -82,6 +82,7 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
 
                                 internal override void AddTo(RequestBuilder requestBuilder) => _scheme.AddTo(requestBuilder);
                             }
+
                             internal abstract void AddTo(RequestBuilder requestBuilder);
                         }
                     }
@@ -127,6 +128,7 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
                                     BearerAuth.AddTo(requestBuilder);
                                 }
                             }
+
                             internal abstract void AddTo(RequestBuilder requestBuilder);
                         }
                     }
@@ -170,6 +172,7 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
 
                                 internal override void AddTo(RequestBuilder requestBuilder) => _scheme.AddTo(requestBuilder);
                             }
+
                             internal sealed partial class BearerAuth : SecurityRequirement
                             {
                                 private readonly SecuritySchemes.BearerAuth _scheme;
@@ -179,6 +182,7 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
 
                                 internal override void AddTo(RequestBuilder requestBuilder) => _scheme.AddTo(requestBuilder);
                             }
+
                             internal abstract void AddTo(RequestBuilder requestBuilder);
                         }
                     }
@@ -228,6 +232,7 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
                             {
                                 internal override void AddTo(RequestBuilder requestBuilder) { }
                             }
+
                             internal abstract void AddTo(RequestBuilder requestBuilder);
                         }
                     }

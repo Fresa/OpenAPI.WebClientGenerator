@@ -24,12 +24,16 @@ internal sealed class SecurityRequirementGenerator(
         $$"""
           internal abstract partial class SecurityRequirement
           {{{securityRequirementObjects.AggregateToString(securityRequirementObject =>
-              securityRequirementObject.Count switch
-              {
-                  0 => GenerateAnonymous(),
-                  1 => GenerateSingleSchemeRequirement(securityRequirementObject),
-                  _ => GenerateMultiSchemeRequirement(securityRequirementObject)
-              })}}
+            $$"""
+            {{securityRequirementObject.Count switch
+            {
+              0 => GenerateAnonymous(),
+              1 => GenerateSingleSchemeRequirement(securityRequirementObject),
+              _ => GenerateMultiSchemeRequirement(securityRequirementObject)
+            }}}
+
+            """)}}
+
               internal abstract void AddTo(RequestBuilder requestBuilder);
           }
           """;
