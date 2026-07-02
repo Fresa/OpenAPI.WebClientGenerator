@@ -83,7 +83,6 @@ $$"""
 }}}
 
         internal void AddTo(RequestBuilder requestBuilder) => _apply(requestBuilder);
-    
     {{new []
     {
         GenerateConst(nameof(scheme.Type), scheme.Type?.GetDisplayName()),
