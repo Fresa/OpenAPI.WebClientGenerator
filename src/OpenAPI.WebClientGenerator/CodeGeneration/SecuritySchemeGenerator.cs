@@ -8,13 +8,13 @@ using OpenAPI.WebClientGenerator.Extensions;
 
 namespace OpenAPI.WebClientGenerator.CodeGeneration;
 
-internal sealed class SecurityGenerator
+internal sealed class SecuritySchemeGenerator
 {
     private readonly IDictionary<string, IOpenApiSecurityScheme> _securitySchemes;
     private readonly Dictionary<OpenApiSecuritySchemeReference, List<string>>[] _topLevelSecuritySchemeGroups;
     private readonly SecuritySchemaTranslations _securitySchemaTranslations;
 
-    public SecurityGenerator(OpenApiDocument openApiDocument)
+    public SecuritySchemeGenerator(OpenApiDocument openApiDocument)
     {
         _securitySchemes = openApiDocument.Components?.SecuritySchemes ??
                            new Dictionary<string, IOpenApiSecurityScheme>();
