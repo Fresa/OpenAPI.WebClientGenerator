@@ -7,7 +7,7 @@ using OpenAPI.WebClientGenerator.Extensions;
 namespace OpenAPI.WebClientGenerator.CodeGeneration;
 
 internal sealed class SecurityRequirementGenerator(
-    Dictionary<OpenApiSecuritySchemeReference, (ParameterGenerator Parameters, List<string> Scopes)>[]
+    Dictionary<OpenApiSecuritySchemeReference, (ParameterGenerator SecurityParameter, List<string> Scopes)>[]
         securityRequirementObjects,
     SecuritySchemaTranslations securitySchemaTranslations)
 {
@@ -47,8 +47,7 @@ internal sealed partial class Anonymous : SecurityRequirement
 """;
 
     private string GenerateSingleSchemeRequirement(
-        Dictionary<OpenApiSecuritySchemeReference, (ParameterGenerator Parameters, List<string> Scopes)>
-            securityRequirementObject)
+        Dictionary<OpenApiSecuritySchemeReference, (ParameterGenerator SecurityParameter, List<string> Scopes)> securityRequirementObject)
     {
         var securityRequirement = securityRequirementObject.Single();
         var className = GetSecurityRequirementsClassName(securityRequirementObject);
@@ -81,8 +80,7 @@ $"""
     }
 
     private string GenerateMultiSchemeRequirement(
-        Dictionary<OpenApiSecuritySchemeReference, (ParameterGenerator Parameters, List<string> Scopes)>
-            securityRequirementObject)
+        Dictionary<OpenApiSecuritySchemeReference, (ParameterGenerator SecurityParameter, List<string> Scopes)> securityRequirementObject)
     {
         var className = GetSecurityRequirementsClassName(securityRequirementObject);
         var scopesPerSecurityRequirement =
@@ -135,8 +133,7 @@ $$"""
 
     private readonly HashSet<string> _requirementGroupNames = [];
     private string GetSecurityRequirementsClassName(
-        Dictionary<OpenApiSecuritySchemeReference, (ParameterGenerator Parameters, List<string> Scopes)>
-            securityRequirementObject)
+        Dictionary<OpenApiSecuritySchemeReference, (ParameterGenerator SecurityParameter, List<string> Scopes)> securityRequirementObject)
     {
         var name = 
             string.Join("And", securityRequirementObject.Keys

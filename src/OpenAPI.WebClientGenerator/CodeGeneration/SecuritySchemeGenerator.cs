@@ -178,7 +178,7 @@ $"""
             .Select(group => group.ToDictionary(
                 scheme => scheme.Key,
                 scheme => (
-                    Parameters: parameters.FirstOrDefault(generator => generator.IsSecuritySchemeParameter(scheme.Key)),
+                    SecurityParameter: parameters.FirstOrDefault(generator => generator.IsSecuritySchemeParameter(scheme.Key)),
                     Scopes: scheme.Value)))
             .ToArray();
         authenticationGenerator = new SecurityRequirementGenerator(securitySchemeGroups, _securitySchemaTranslations);
