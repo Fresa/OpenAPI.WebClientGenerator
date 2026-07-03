@@ -70,21 +70,31 @@ internal sealed partial class Anonymous : SecurityRequirement
     }
 
     private static string GenerateApiKeyRequirement(
-        string className, 
-        string schemeClassName, 
-        List<string> scopes, 
-        OpenApiSecuritySchemeReference schemeReference, 
+        string className,
+        string schemeClassName,
+        List<string> scopes,
+        OpenApiSecuritySchemeReference schemeReference,
         ParameterGenerator? parameter)
     {
-        var typeArgument = parameter?
-            .FullyQualifiedTypeDeclarationIdentifier ?? "Corvus.Json.JsonAny";
-        var isRequired = (parameter?.IsParameterRequired ?? false)
-            .ToString().ToLowerInvariant();
-        var schemaLocation = parameter is null ? 
-            "string.Empty" : 
-            $"\"{parameter.SchemaLocation}\"";
-        var specification = parameter?.ParameterSpecificationAsJson
-            ?? 
+        if (parameter is not null)
+        {
+            return
+$$"""
+internal sealed partial class {{className}} : SecurityRequirement
+{{{GenerateScopes(scopes)}}
+    /// <summary>
+    /// The key is inferred from the "{{parameter.ParameterName}}" request {{parameter.Location.GetDisplayName()}} parameter.
+    /// </summary>
+    internal {{className}}()
+    {
+    }
+
+    internal override void AddTo(RequestBuilder requestBuilder) { }
+}
+""";
+        }
+
+        var specification =
 $$"""
 {
     "name": "{{schemeReference.Name}}",
@@ -95,10 +105,10 @@ $$"""
 $$""""
 internal sealed partial class {{className}} : SecurityRequirement
 {{{GenerateScopes(scopes)}}
-    private readonly SecuritySchemes.{{schemeClassName}}<{{typeArgument}}> _scheme;
+    private readonly SecuritySchemes.{{schemeClassName}} _scheme;
 
-    internal {{className}}({{typeArgument}} {{SecurityScheme.ApiKey.Key.Name}}) =>
-        _scheme = new SecuritySchemes.{{schemeClassName}}<{{typeArgument}}>({{SecurityScheme.ApiKey.Key.Name}}, {{isRequired}}, {{schemaLocation}},
+    internal {{className}}({{SecurityScheme.ApiKey.Key.GetMethodParameter()}}) =>
+        _scheme = new SecuritySchemes.{{schemeClassName}}({{SecurityScheme.ApiKey.Key.Name}}, false, string.Empty,
             """
             {{specification.Indent(12).Trim()}}
             """);
@@ -211,10 +221,9 @@ $"""
 """ : "")}}{{securityRequirementObject.AggregateToString(securityRequirement =>
 {
   var schemeClassName = GetSecurityRequirementClassName(securityRequirement.Key);
-  var schemeClassGenericTypeDirective = GetSchemeClassGenericTypeDirective(securityRequirement);
   return
 $$"""
-    internal required SecuritySchemes.{{schemeClassName}}{{schemeClassGenericTypeDirective}} {{schemeClassName}} { init; get; }
+    internal required SecuritySchemes.{{schemeClassName}} {{schemeClassName}} { init; get; }
 """;
 })}}
 
@@ -230,18 +239,6 @@ $$"""
     }
 }
 """;
-    }
-
-    private static string GetSchemeClassGenericTypeDirective(
-        KeyValuePair<OpenApiSecuritySchemeReference, (ParameterGenerator SecurityParameter, List<string> Scopes)>
-            securityRequirement)
-    {
-        if (securityRequirement.Key.Type != SecuritySchemeType.ApiKey)
-        {
-            return string.Empty;
-        }
-        var securityParameter = securityRequirement.Value.SecurityParameter;
-        return $"<{(securityParameter == null ? "Corvus.Json.JsonAny" : securityParameter.FullyQualifiedTypeDeclarationIdentifier)}>";
     }
 
     private readonly HashSet<string> _requirementGroupNames = [];

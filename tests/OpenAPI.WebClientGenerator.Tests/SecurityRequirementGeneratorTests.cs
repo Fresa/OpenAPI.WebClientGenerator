@@ -119,7 +119,7 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
                         {
                             internal sealed partial class ApiKeyAuthAndBearerAuth : SecurityRequirement
                             {
-                                internal required SecuritySchemes.ApiKeyAuth<Corvus.Json.JsonAny> ApiKeyAuth { init; get; }
+                                internal required SecuritySchemes.ApiKeyAuth ApiKeyAuth { init; get; }
                                 internal required SecuritySchemes.BearerAuth BearerAuth { init; get; }
 
                                 internal override void AddTo(RequestBuilder requestBuilder)
@@ -165,10 +165,10 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
                         {
                             internal sealed partial class ApiKeyAuth : SecurityRequirement
                             {
-                                private readonly SecuritySchemes.ApiKeyAuth<Corvus.Json.JsonAny> _scheme;
+                                private readonly SecuritySchemes.ApiKeyAuth _scheme;
 
                                 internal ApiKeyAuth(Corvus.Json.JsonAny apiKey) =>
-                                    _scheme = new SecuritySchemes.ApiKeyAuth<Corvus.Json.JsonAny>(apiKey, false, string.Empty,
+                                    _scheme = new SecuritySchemes.ApiKeyAuth(apiKey, false, string.Empty,
                                         """
                                         {
                                             "name": "X-API-Key",
@@ -212,7 +212,7 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
     }
 
     [Fact]
-    public void ApiKeySchemeReferencingParameter_BindsUsingTheParameterSchema()
+    public void ApiKeySchemeReferencingParameter_DoesNotBindTheValue()
     {
         var source = Generate(
             """
@@ -240,22 +240,14 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
                         {
                             internal sealed partial class ApiKeyAuth : SecurityRequirement
                             {
-                                private readonly SecuritySchemes.ApiKeyAuth<Corvus.Json.JsonString> _scheme;
+                                /// <summary>
+                                /// The key is inferred from the "X-API-Key" request header parameter.
+                                /// </summary>
+                                internal ApiKeyAuth()
+                                {
+                                }
 
-                                internal ApiKeyAuth(Corvus.Json.JsonString apiKey) =>
-                                    _scheme = new SecuritySchemes.ApiKeyAuth<Corvus.Json.JsonString>(apiKey, true, "#/paths/~1foo/get/parameters/0/schema",
-                                        """
-                                        {
-                                          "name": "X-API-Key",
-                                          "in": "header",
-                                          "required": true,
-                                          "schema": {
-                                            "type": "string"
-                                          }
-                                        }
-                                        """);
-
-                                internal override void AddTo(RequestBuilder requestBuilder) => _scheme.AddTo(requestBuilder);
+                                internal override void AddTo(RequestBuilder requestBuilder) { }
                             }
 
                             internal abstract void AddTo(RequestBuilder requestBuilder);
@@ -293,10 +285,10 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
                         {
                             internal sealed partial class ApiKeyAuth : SecurityRequirement
                             {
-                                private readonly SecuritySchemes.ApiKeyAuth<Corvus.Json.JsonAny> _scheme;
+                                private readonly SecuritySchemes.ApiKeyAuth _scheme;
 
                                 internal ApiKeyAuth(Corvus.Json.JsonAny apiKey) =>
-                                    _scheme = new SecuritySchemes.ApiKeyAuth<Corvus.Json.JsonAny>(apiKey, false, string.Empty,
+                                    _scheme = new SecuritySchemes.ApiKeyAuth(apiKey, false, string.Empty,
                                         """
                                         {
                                             "name": "X-API-Key",
@@ -346,7 +338,7 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
                         {
                             internal sealed partial class ApiKeyAuthAndBearerAuth : SecurityRequirement
                             {
-                                internal required SecuritySchemes.ApiKeyAuth<Corvus.Json.JsonString> ApiKeyAuth { init; get; }
+                                internal required SecuritySchemes.ApiKeyAuth ApiKeyAuth { init; get; }
                                 internal required SecuritySchemes.BearerAuth BearerAuth { init; get; }
 
                                 internal override void AddTo(RequestBuilder requestBuilder)
@@ -392,7 +384,7 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
                         {
                             internal sealed partial class ApiKeyAuthAndBearerAuth : SecurityRequirement
                             {
-                                internal required SecuritySchemes.ApiKeyAuth<Corvus.Json.JsonAny> ApiKeyAuth { init; get; }
+                                internal required SecuritySchemes.ApiKeyAuth ApiKeyAuth { init; get; }
                                 internal required SecuritySchemes.BearerAuth BearerAuth { init; get; }
 
                                 internal override void AddTo(RequestBuilder requestBuilder)
@@ -459,7 +451,7 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
                                     }
                                 }
 
-                                internal required SecuritySchemes.ApiKeyAuth<Corvus.Json.JsonAny> ApiKeyAuth { init; get; }
+                                internal required SecuritySchemes.ApiKeyAuth ApiKeyAuth { init; get; }
                                 internal required SecuritySchemes.OAuth2 OAuth2 { init; get; }
 
                                 internal override void AddTo(RequestBuilder requestBuilder)

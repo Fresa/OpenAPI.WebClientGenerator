@@ -4,7 +4,7 @@ internal static class SecurityScheme
 {
     internal static class ApiKey
     {
-        internal static Argument Key { get; } = new("apiKey", "T");
+        internal static Argument Key { get; } = new("apiKey", "Corvus.Json.JsonAny");
     }
     
     internal static class Http

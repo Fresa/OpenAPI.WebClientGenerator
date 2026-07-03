@@ -64,12 +64,11 @@ internal static class SecuritySchemes
 
     internal const string {{className}}Key = "{{schemaName}}";
 {{GenerateSchemeComment(scheme).Indent(4)}}
-    internal sealed partial class {{className}}<T>
-        where T : struct, Corvus.Json.IJsonValue<T>
+    internal sealed partial class {{className}}
     {
         private readonly System.Action<RequestBuilder> _apply;
         internal {{className}}({{SecurityScheme.ApiKey.Key.GetMethodParameter()}}, bool isRequired, string schemaLocation, string parameterSpecificationAsJson) =>
-            _apply = requestBuilder => requestBuilder.Add{{scheme.In?.GetDisplayName().ToPascalCase()}}<T>(Name, {{SecurityScheme.ApiKey.Key.Name}}, isRequired, schemaLocation, parameterSpecificationAsJson);
+            _apply = requestBuilder => requestBuilder.Add{{scheme.In?.GetDisplayName().ToPascalCase()}}<{{SecurityScheme.ApiKey.Key.Type}}>(Name, {{SecurityScheme.ApiKey.Key.Name}}, isRequired, schemaLocation, parameterSpecificationAsJson);
 
         internal void AddTo(RequestBuilder requestBuilder) => _apply(requestBuilder);
 {{GenerateSchemeConstants(scheme).Indent(8)}}
