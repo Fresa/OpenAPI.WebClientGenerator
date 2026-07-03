@@ -119,7 +119,7 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
                         {
                             internal sealed partial class ApiKeyAuthAndBearerAuth : SecurityRequirement
                             {
-                                internal required SecuritySchemes.ApiKeyAuth ApiKeyAuth { init; get; }
+                                internal required SecuritySchemes.ApiKeyAuth<Corvus.Json.JsonAny> ApiKeyAuth { init; get; }
                                 internal required SecuritySchemes.BearerAuth BearerAuth { init; get; }
 
                                 internal override void AddTo(RequestBuilder requestBuilder)
@@ -210,7 +210,207 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
 
         generatedFiles.Should().NotContain(SecurityRequirementFile);
     }
-    
+
+    [Fact]
+    public void ApiKeySchemeReferencingParameter_BindsUsingTheParameterSchema()
+    {
+        var source = Generate(
+            """
+            "ApiKeyAuth": { "type": "apiKey", "in": "header", "name": "X-API-Key" }
+            """,
+            """
+            "parameters": [
+              { "name": "X-API-Key", "in": "header", "required": true, "schema": { "type": "string" } }
+            ],
+            "security": [ { "ApiKeyAuth": [] } ],
+            """,
+            out _);
+
+        source.Should().Be(
+            """"
+            #nullable enable
+            namespace Example;
+            internal partial class Foo
+            {
+                internal partial class Foo0
+                {
+                    internal partial class Get
+                    {
+                        internal abstract partial class SecurityRequirement
+                        {
+                            internal sealed partial class ApiKeyAuth : SecurityRequirement
+                            {
+                                private readonly SecuritySchemes.ApiKeyAuth<Corvus.Json.JsonString> _scheme;
+
+                                internal ApiKeyAuth(Corvus.Json.JsonString apiKey) =>
+                                    _scheme = new SecuritySchemes.ApiKeyAuth<Corvus.Json.JsonString>(apiKey, true, "#/paths/~1foo/get/parameters/0/schema",
+                                        """
+                                        {
+                                          "name": "X-API-Key",
+                                          "in": "header",
+                                          "required": true,
+                                          "schema": {
+                                            "type": "string"
+                                          }
+                                        }
+                                        """);
+
+                                internal override void AddTo(RequestBuilder requestBuilder) => _scheme.AddTo(requestBuilder);
+                            }
+
+                            internal abstract void AddTo(RequestBuilder requestBuilder);
+                        }
+                    }
+                }
+            }
+            #nullable restore
+            """");
+    }
+
+    [Fact]
+    public void ApiKeySchemeWithoutReferencedParameter_FallsBackToJsonAny()
+    {
+        var source = Generate(
+            """
+            "ApiKeyAuth": { "type": "apiKey", "in": "header", "name": "X-API-Key" }
+            """,
+            """
+            "security": [ { "ApiKeyAuth": [] } ],
+            """,
+            out _);
+
+        source.Should().Be(
+            """"
+            #nullable enable
+            namespace Example;
+            internal partial class Foo
+            {
+                internal partial class Foo0
+                {
+                    internal partial class Get
+                    {
+                        internal abstract partial class SecurityRequirement
+                        {
+                            internal sealed partial class ApiKeyAuth : SecurityRequirement
+                            {
+                                private readonly SecuritySchemes.ApiKeyAuth<Corvus.Json.JsonAny> _scheme;
+
+                                internal ApiKeyAuth(Corvus.Json.JsonAny apiKey) =>
+                                    _scheme = new SecuritySchemes.ApiKeyAuth<Corvus.Json.JsonAny>(apiKey, false, string.Empty,
+                                        """
+                                        {
+                                            "name": "X-API-Key",
+                                            "in": "header"
+                                        }
+                                        """);
+
+                                internal override void AddTo(RequestBuilder requestBuilder) => _scheme.AddTo(requestBuilder);
+                            }
+
+                            internal abstract void AddTo(RequestBuilder requestBuilder);
+                        }
+                    }
+                }
+            }
+            #nullable restore
+            """");
+    }
+
+    [Fact]
+    public void MultiSchemeWithApiKeyReferencingParameter_GeneratesTypedProperty()
+    {
+        var source = Generate(
+            """
+            "ApiKeyAuth": { "type": "apiKey", "in": "header", "name": "X-API-Key" },
+            "BearerAuth": { "type": "http", "scheme": "bearer" }
+            """,
+            """
+            "parameters": [
+              { "name": "X-API-Key", "in": "header", "required": true, "schema": { "type": "string" } }
+            ],
+            "security": [ { "ApiKeyAuth": [], "BearerAuth": [] } ],
+            """,
+            out _);
+
+        source.Should().Be(
+            """"
+            #nullable enable
+            namespace Example;
+            internal partial class Foo
+            {
+                internal partial class Foo0
+                {
+                    internal partial class Get
+                    {
+                        internal abstract partial class SecurityRequirement
+                        {
+                            internal sealed partial class ApiKeyAuthAndBearerAuth : SecurityRequirement
+                            {
+                                internal required SecuritySchemes.ApiKeyAuth<Corvus.Json.JsonString> ApiKeyAuth { init; get; }
+                                internal required SecuritySchemes.BearerAuth BearerAuth { init; get; }
+
+                                internal override void AddTo(RequestBuilder requestBuilder)
+                                {
+                                    ApiKeyAuth.AddTo(requestBuilder);
+                                    BearerAuth.AddTo(requestBuilder);
+                                }
+                            }
+
+                            internal abstract void AddTo(RequestBuilder requestBuilder);
+                        }
+                    }
+                }
+            }
+            #nullable restore
+            """");
+    }
+
+    [Fact]
+    public void MultiSchemeWithApiKeyWithoutParameter_GeneratesJsonAnyProperty()
+    {
+        var source = Generate(
+            """
+            "ApiKeyAuth": { "type": "apiKey", "in": "header", "name": "X-API-Key" },
+            "BearerAuth": { "type": "http", "scheme": "bearer" }
+            """,
+            """
+            "security": [ { "ApiKeyAuth": [], "BearerAuth": [] } ],
+            """,
+            out _);
+
+        source.Should().Be(
+            """"
+            #nullable enable
+            namespace Example;
+            internal partial class Foo
+            {
+                internal partial class Foo0
+                {
+                    internal partial class Get
+                    {
+                        internal abstract partial class SecurityRequirement
+                        {
+                            internal sealed partial class ApiKeyAuthAndBearerAuth : SecurityRequirement
+                            {
+                                internal required SecuritySchemes.ApiKeyAuth<Corvus.Json.JsonAny> ApiKeyAuth { init; get; }
+                                internal required SecuritySchemes.BearerAuth BearerAuth { init; get; }
+
+                                internal override void AddTo(RequestBuilder requestBuilder)
+                                {
+                                    ApiKeyAuth.AddTo(requestBuilder);
+                                    BearerAuth.AddTo(requestBuilder);
+                                }
+                            }
+
+                            internal abstract void AddTo(RequestBuilder requestBuilder);
+                        }
+                    }
+                }
+            }
+            #nullable restore
+            """");
+    }
+
     [Fact]
     public void OperationWithMultipleSchemes_GeneratesScopesPerScopedScheme()
     {
@@ -259,7 +459,7 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
                                     }
                                 }
 
-                                internal required SecuritySchemes.ApiKeyAuth ApiKeyAuth { init; get; }
+                                internal required SecuritySchemes.ApiKeyAuth<Corvus.Json.JsonAny> ApiKeyAuth { init; get; }
                                 internal required SecuritySchemes.OAuth2 OAuth2 { init; get; }
 
                                 internal override void AddTo(RequestBuilder requestBuilder)

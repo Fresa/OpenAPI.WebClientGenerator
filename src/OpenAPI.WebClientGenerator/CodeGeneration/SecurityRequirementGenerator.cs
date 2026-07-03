@@ -167,7 +167,7 @@ internal sealed partial class {{className}} : SecurityRequirement
 """;
 
     private static string GenerateScopes(List<string> scopes) =>
-        !scopes.Any() ? "" :
+        scopes.Any() ? 
 $$"""
 
     internal static class Scopes
@@ -177,7 +177,7 @@ $"""
 """)}}
     }
 
-""";
+""" : "";
 
     private string GenerateMultiSchemeRequirement(
         Dictionary<OpenApiSecuritySchemeReference, (ParameterGenerator SecurityParameter, List<string> Scopes)> securityRequirementObject)
@@ -211,9 +211,10 @@ $"""
 """ : "")}}{{securityRequirementObject.AggregateToString(securityRequirement =>
 {
   var schemeClassName = GetSecurityRequirementClassName(securityRequirement.Key);
+  var schemeClassGenericTypeDirective = GetSchemeClassGenericTypeDirective(securityRequirement);
   return
 $$"""
-    internal required SecuritySchemes.{{schemeClassName}} {{schemeClassName}} { init; get; }
+    internal required SecuritySchemes.{{schemeClassName}}{{schemeClassGenericTypeDirective}} {{schemeClassName}} { init; get; }
 """;
 })}}
 
@@ -229,6 +230,18 @@ $$"""
     }
 }
 """;
+    }
+
+    private static string GetSchemeClassGenericTypeDirective(
+        KeyValuePair<OpenApiSecuritySchemeReference, (ParameterGenerator SecurityParameter, List<string> Scopes)>
+            securityRequirement)
+    {
+        if (securityRequirement.Key.Type != SecuritySchemeType.ApiKey)
+        {
+            return string.Empty;
+        }
+        var securityParameter = securityRequirement.Value.SecurityParameter;
+        return $"<{(securityParameter == null ? "Corvus.Json.JsonAny" : securityParameter.FullyQualifiedTypeDeclarationIdentifier)}>";
     }
 
     private readonly HashSet<string> _requirementGroupNames = [];
