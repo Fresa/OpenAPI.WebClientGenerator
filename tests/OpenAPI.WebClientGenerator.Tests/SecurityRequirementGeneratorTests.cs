@@ -165,10 +165,16 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
                         {
                             internal sealed partial class ApiKeyAuth : SecurityRequirement
                             {
-                                private readonly SecuritySchemes.ApiKeyAuth _scheme;
+                                private readonly SecuritySchemes.ApiKeyAuth<Corvus.Json.JsonAny> _scheme;
 
-                                internal ApiKeyAuth(string apiKey) =>
-                                    _scheme = new SecuritySchemes.ApiKeyAuth(apiKey);
+                                internal ApiKeyAuth(Corvus.Json.JsonAny apiKey) =>
+                                    _scheme = new SecuritySchemes.ApiKeyAuth<Corvus.Json.JsonAny>(apiKey, false, string.Empty,
+                                        """
+                                        {
+                                            "name": "X-API-Key",
+                                            "in": "header"
+                                        }
+                                        """);
 
                                 internal override void AddTo(RequestBuilder requestBuilder) => _scheme.AddTo(requestBuilder);
                             }
