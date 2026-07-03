@@ -38,67 +38,135 @@ namespace {{@namespace}};
 /// Defines security schemes that can be used by the operations
 /// </summary>
 internal static class SecuritySchemes
-{{{_securitySchemes.AggregateToString(pair =>
-    {
-        var schemeName = pair.Key;
-        var className = schemeName.ToPascalCase();
-        var scheme = pair.Value;
-        var constructorParameters = scheme.GetSchemeConstructorArguments().GetMethodParameterList();
-        return scheme.Type == null ? string.Empty :
-$$"""
-
-    internal const string {{className}}Key = "{{pair.Key}}";
-{{scheme.Description.AsComment("summary", "para").Indent(4)}}
-    internal sealed partial class {{className}}
-    {
-        private readonly System.Action<RequestBuilder> _apply;
-{{scheme.Type switch
-{
-    SecuritySchemeType.ApiKey =>
-$"""
-        internal {className}({constructorParameters}) =>
-            _apply = requestBuilder => requestBuilder.Add{scheme.In?.GetDisplayName().ToPascalCase()}(Name, {SecurityScheme.ApiKey.Key.Name});
-""",
-    SecuritySchemeType.Http when string.Equals(scheme.Scheme, "basic", StringComparison.OrdinalIgnoreCase) =>
-$$"""
-        internal {{className}}({{constructorParameters}}) =>
-            _apply = requestBuilder => requestBuilder.AddHeader("Authorization", $"Basic {System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes($"{{{SecurityScheme.Http.Username.Name}}}:{{{SecurityScheme.Http.Password.Name}}}"))}");
-""",
-    _ when scheme.Type is SecuritySchemeType.OAuth2 or SecuritySchemeType.OpenIdConnect
-           || string.Equals(scheme.Scheme, "bearer", StringComparison.OrdinalIgnoreCase) =>
-$$"""
-        internal {{className}}({{constructorParameters}}) =>
-            _apply = requestBuilder => requestBuilder.AddHeader("Authorization", $"Bearer {{{SecurityScheme.Bearer.Token.Name}}}");
-""",
-    SecuritySchemeType.MutualTLS =>
-$$"""
-        internal {{className}}({{constructorParameters}}) =>
-            _apply = _ => { };
-""",
-    _ =>
-$$"""
-        internal {{className}}({{constructorParameters}}) =>
-            _apply = {{SecurityScheme.Custom.Apply}};
-"""
-}}}
-
-        internal void AddTo(RequestBuilder requestBuilder) => _apply(requestBuilder);
-    {{new []
-    {
-        GenerateConst(nameof(scheme.Type), scheme.Type?.GetDisplayName()),
-        GenerateConst(nameof(scheme.Scheme), scheme.Scheme),
-        GenerateConst(nameof(scheme.BearerFormat), scheme.BearerFormat),
-        GenerateConst(nameof(scheme.OpenIdConnectUrl), scheme.OpenIdConnectUrl?.ToString()),
-        GenerateGetParameterMethods(scheme),
-        $"internal const bool {nameof(scheme.Deprecated)} = {scheme.Deprecated.ToString().ToLowerInvariant()};",
-        GenerateFlowsObject(nameof(scheme.Flows), scheme.Flows)
-    }.RemoveEmptyLines().AggregateToString().Indent(8)}}
-    }
-""";
-    })}}
+{{{_securitySchemes.AggregateToString(pair => GenerateScheme(pair.Key, pair.Value))}}
 }
 """);
     }
+
+    private static string GenerateScheme(string schemaName, IOpenApiSecurityScheme scheme) =>
+        scheme.Type switch
+        {
+            null => string.Empty,
+            SecuritySchemeType.ApiKey => GenerateApiKey(schemaName, scheme),
+            SecuritySchemeType.Http when string.Equals(scheme.Scheme, "basic", StringComparison.OrdinalIgnoreCase) =>
+                GenerateBasic(schemaName, scheme),
+            _ when scheme.Type is SecuritySchemeType.OAuth2 or SecuritySchemeType.OpenIdConnect
+                   || string.Equals(scheme.Scheme, "bearer", StringComparison.OrdinalIgnoreCase) =>
+                GenerateBearer(schemaName, scheme),
+            SecuritySchemeType.MutualTLS => GenerateMutualTls(schemaName, scheme),
+            _ => GenerateCustom(schemaName, scheme),
+        };
+
+    private static string GenerateApiKey(string schemaName, IOpenApiSecurityScheme scheme)
+    {
+        var className = schemaName.ToPascalCase();
+        return $$"""
+
+    internal const string {{className}}Key = "{{schemaName}}";
+{{GenerateSchemeComment(scheme).Indent(4)}}
+    internal sealed partial class {{className}}<T>
+        where T : struct, Corvus.Json.IJsonValue<T>
+    {
+        private readonly System.Action<RequestBuilder> _apply;
+        internal {{className}}(T {{SecurityScheme.ApiKey.Key.Name}}, bool isRequired, string schemaLocation, string parameterSpecificationAsJson) =>
+            _apply = requestBuilder => requestBuilder.Add{{scheme.In?.GetDisplayName().ToPascalCase()}}<T>(Name, {{SecurityScheme.ApiKey.Key.Name}}, isRequired, schemaLocation, parameterSpecificationAsJson);
+
+        internal void AddTo(RequestBuilder requestBuilder) => _apply(requestBuilder);
+{{GenerateSchemeConstants(scheme).Indent(8)}}
+    }
+""";
+    }
+
+    private static string GenerateBasic(string schemaName, IOpenApiSecurityScheme scheme)
+    {
+        var className = schemaName.ToPascalCase();
+        return $$"""
+
+    internal const string {{className}}Key = "{{schemaName}}";
+{{GenerateSchemeComment(scheme).Indent(4)}}
+    internal sealed partial class {{className}}
+    {
+        private readonly System.Action<RequestBuilder> _apply;
+        internal {{className}}({{scheme.GetSchemeConstructorArguments().GetMethodParameterList()}}) =>
+            _apply = requestBuilder => requestBuilder.AddHeader("Authorization", $"Basic {System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes($"{{{SecurityScheme.Http.Username.Name}}}:{{{SecurityScheme.Http.Password.Name}}}"))}");
+
+        internal void AddTo(RequestBuilder requestBuilder) => _apply(requestBuilder);
+{{GenerateSchemeConstants(scheme).Indent(8)}}
+    }
+""";
+    }
+
+    private static string GenerateBearer(string schemaName, IOpenApiSecurityScheme scheme)
+    {
+        var className = schemaName.ToPascalCase();
+        return $$"""
+
+    internal const string {{className}}Key = "{{schemaName}}";
+{{GenerateSchemeComment(scheme).Indent(4)}}
+    internal sealed partial class {{className}}
+    {
+        private readonly System.Action<RequestBuilder> _apply;
+        internal {{className}}({{scheme.GetSchemeConstructorArguments().GetMethodParameterList()}}) =>
+            _apply = requestBuilder => requestBuilder.AddHeader("Authorization", $"Bearer {{{SecurityScheme.Bearer.Token.Name}}}");
+
+        internal void AddTo(RequestBuilder requestBuilder) => _apply(requestBuilder);
+{{GenerateSchemeConstants(scheme).Indent(8)}}
+    }
+""";
+    }
+
+    private static string GenerateCustom(string schemaName, IOpenApiSecurityScheme scheme)
+    {
+        var className = schemaName.ToPascalCase();
+        return $$"""
+
+    internal const string {{className}}Key = "{{schemaName}}";
+{{GenerateSchemeComment(scheme).Indent(4)}}
+    internal sealed partial class {{className}}
+    {
+        private readonly System.Action<RequestBuilder> _apply;
+        internal {{className}}({{scheme.GetSchemeConstructorArguments().GetMethodParameterList()}}) =>
+            _apply = {{SecurityScheme.Custom.Apply}};
+
+        internal void AddTo(RequestBuilder requestBuilder) => _apply(requestBuilder);
+{{GenerateSchemeConstants(scheme).Indent(8)}}
+    }
+""";
+    }
+
+    private static string GenerateMutualTls(string schemaName, IOpenApiSecurityScheme scheme)
+    {
+        var className = schemaName.ToPascalCase();
+        return $$"""
+
+    internal const string {{className}}Key = "{{schemaName}}";
+{{GenerateSchemeComment(scheme).Indent(4)}}
+    internal sealed partial class {{className}}
+    {
+        private readonly System.Action<RequestBuilder> _apply;
+        internal {{className}}() =>
+            _apply = _ => { };
+
+        internal void AddTo(RequestBuilder requestBuilder) => _apply(requestBuilder);
+{{GenerateSchemeConstants(scheme).Indent(8)}}
+    }
+""";
+    }
+
+    private static string GenerateSchemeConstants(IOpenApiSecurityScheme scheme) =>
+        new []
+        {
+            GenerateConst(nameof(scheme.Type), scheme.Type?.GetDisplayName()),
+            GenerateConst(nameof(scheme.Scheme), scheme.Scheme),
+            GenerateConst(nameof(scheme.BearerFormat), scheme.BearerFormat),
+            GenerateConst(nameof(scheme.OpenIdConnectUrl), scheme.OpenIdConnectUrl?.ToString()),
+            GenerateGetParameterMethods(scheme),
+            $"internal const bool {nameof(scheme.Deprecated)} = {scheme.Deprecated.ToString().ToLowerInvariant()};",
+            GenerateFlowsObject(nameof(scheme.Flows), scheme.Flows)
+        }.RemoveEmptyLines().AggregateToString();
+
+    private static string GenerateSchemeComment(IOpenApiSecurityScheme scheme) =>
+        scheme.Description.AsComment("summary", "para");
 
     private static string GenerateConst(string name, string? value) =>
         value == null
