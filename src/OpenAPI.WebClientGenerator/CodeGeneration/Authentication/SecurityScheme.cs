@@ -4,7 +4,7 @@ internal static class SecurityScheme
 {
     internal static class ApiKey
     {
-        internal static Argument Key { get; } = new("apiKey", "string");
+        internal static Argument Key { get; } = new("apiKey", "T");
     }
     
     internal static class Http

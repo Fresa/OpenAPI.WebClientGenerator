@@ -68,7 +68,7 @@ internal static class SecuritySchemes
         where T : struct, Corvus.Json.IJsonValue<T>
     {
         private readonly System.Action<RequestBuilder> _apply;
-        internal {{className}}(T {{SecurityScheme.ApiKey.Key.Name}}, bool isRequired, string schemaLocation, string parameterSpecificationAsJson) =>
+        internal {{className}}({{SecurityScheme.ApiKey.Key.GetMethodParameter()}}, bool isRequired, string schemaLocation, string parameterSpecificationAsJson) =>
             _apply = requestBuilder => requestBuilder.Add{{scheme.In?.GetDisplayName().ToPascalCase()}}<T>(Name, {{SecurityScheme.ApiKey.Key.Name}}, isRequired, schemaLocation, parameterSpecificationAsJson);
 
         internal void AddTo(RequestBuilder requestBuilder) => _apply(requestBuilder);
@@ -87,7 +87,7 @@ internal static class SecuritySchemes
     internal sealed partial class {{className}}
     {
         private readonly System.Action<RequestBuilder> _apply;
-        internal {{className}}({{scheme.GetSchemeConstructorArguments().GetMethodParameterList()}}) =>
+        internal {{className}}({{SecurityScheme.Http.Username.GetMethodParameter()}}, {{SecurityScheme.Http.Password.GetMethodParameter()}}) =>
             _apply = requestBuilder => requestBuilder.AddHeader("Authorization", $"Basic {System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes($"{{{SecurityScheme.Http.Username.Name}}}:{{{SecurityScheme.Http.Password.Name}}}"))}");
 
         internal void AddTo(RequestBuilder requestBuilder) => _apply(requestBuilder);
@@ -106,7 +106,7 @@ internal static class SecuritySchemes
     internal sealed partial class {{className}}
     {
         private readonly System.Action<RequestBuilder> _apply;
-        internal {{className}}({{scheme.GetSchemeConstructorArguments().GetMethodParameterList()}}) =>
+        internal {{className}}({{SecurityScheme.Bearer.Token.GetMethodParameter()}}) =>
             _apply = requestBuilder => requestBuilder.AddHeader("Authorization", $"Bearer {{{SecurityScheme.Bearer.Token.Name}}}");
 
         internal void AddTo(RequestBuilder requestBuilder) => _apply(requestBuilder);
@@ -125,8 +125,8 @@ internal static class SecuritySchemes
     internal sealed partial class {{className}}
     {
         private readonly System.Action<RequestBuilder> _apply;
-        internal {{className}}({{scheme.GetSchemeConstructorArguments().GetMethodParameterList()}}) =>
-            _apply = {{SecurityScheme.Custom.Apply}};
+        internal {{className}}({{SecurityScheme.Custom.Apply.GetMethodParameter()}}) =>
+            _apply = {{SecurityScheme.Custom.Apply.Name}};
 
         internal void AddTo(RequestBuilder requestBuilder) => _apply(requestBuilder);
 {{GenerateSchemeConstants(scheme).Indent(8)}}
