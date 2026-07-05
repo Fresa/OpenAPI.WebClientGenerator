@@ -297,30 +297,3 @@ public class ServerGeneratorTests(ITestOutputHelper testOutputHelper)
         generatedFiles.Should().NotContain(ServerFile);
     }
 }
-
-internal static class Servers
-{
-    internal class Server(Uri baseUri)
-    {
-        /// <summary>
-        /// The base uri of the server.
-        /// </summary>
-        internal Uri BaseUrl => baseUri;
-    }
-
-    internal static Server0 UseServer0(Server0.Region region = Server0.Region.Us) => 
-        new(region); 
-        
-    internal static readonly Server
-        Production = new(new Uri("https://api.example.com", UriKind.RelativeOrAbsolute));
-
-    internal sealed class Server0(Server0.Region region = Server0.Region.Us) : 
-        Server(new Uri($"https://{region}.example.com", UriKind.RelativeOrAbsolute))
-    {
-        internal enum Region
-        {
-            Us,
-            Eu
-        }
-    }
-}
