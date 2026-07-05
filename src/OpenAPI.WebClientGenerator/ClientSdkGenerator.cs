@@ -87,7 +87,10 @@ public sealed class WebClientGenerator : IIncrementalGenerator
 
         var authGenerator = new SecuritySchemeGenerator(openApi);
         authGenerator.GenerateSecuritySchemeClass(rootNamespace)?.AddTo(context);
-        
+
+        var serverGenerator = new ServerGenerator(openApi, rootNamespace);
+        serverGenerator.GenerateClass()?.AddTo(context);
+
         var openApiVisitor = OpenApiVisitor.ForSpecification(openApiSpecification);
 
         foreach (var path in openApi.Paths)

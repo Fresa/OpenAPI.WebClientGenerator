@@ -15,6 +15,9 @@ using System.Net.Http;
 
 namespace {{Namespace}};
 
+/// <summary>
+/// Web client
+/// </summary>
 internal sealed partial class {{ClassName}}(
     HttpClient httpClient, 
     WebClientConfiguration? configuration = null)

@@ -81,5 +81,6 @@ internal static class StringExtensions
                     .Append($"/// </{commentType}>")));
     }
 
-    internal static string PrependNewline(this string str) => "\n" + str;
+    internal static string PrependNewline(this string? str) => 
+        string.IsNullOrWhiteSpace(str) ? string.Empty : "\n" + str;
 }

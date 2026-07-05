@@ -36,7 +36,16 @@ internal static class EnumerableExtensions
     internal static IEnumerable<string> RemoveEmptyLines(this IEnumerable<string> list) =>
         list
             .Where(line => !string.IsNullOrWhiteSpace(line));
-    
+
+    internal static IEnumerable<string> InterleaveEmpty(this IEnumerable<string> list)
+    {
+        foreach (var item in list)
+        {
+            yield return item;
+            yield return string.Empty;
+        }
+    }
+        
     internal static string AsParams(this IEnumerable<string> values)
     {
         var result = string.Join(", ", values.Select(scope => $"\"{scope}\""));
