@@ -22,8 +22,10 @@ namespace {{Namespace}};
 /// <param name="configuration">The web client configuration.</param>
 internal sealed partial class {{ClassName}}(
     HttpClient httpClient,
-    WebClientConfiguration? configuration = null)
+    WebClientConfiguration? configuration = null) : IDisposable
 {
+    private bool _disposeHttpClient;
+
     /// <summary>
     /// Create web client
     /// </summary>
@@ -36,9 +38,19 @@ internal sealed partial class {{ClassName}}(
             BaseAddress = server.BaseUrl
         }, configuration)
     {
+        _disposeHttpClient = true;
     }
 
     private WebClientConfiguration _configuration = configuration ?? new();
+    
+    public void Dispose()
+    {
+        if (!_disposeHttpClient)
+        {
+            return;
+        }
+        httpClient.Dispose();
+    }
 }
 #nullable restore
 """);

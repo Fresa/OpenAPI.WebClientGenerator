@@ -79,7 +79,7 @@ public class ImportFooEventsTests(FooApplicationFactory app) : FooTestSpecificat
     {
         using var httpClient = app.CreateClient()
             .WithOAuth2ImplicitFlowAuthentication("update");
-        var client = new Foo.Foo(httpClient);
+        using var client = new Foo.Foo(httpClient);
         var result = await client.Foo_(1).Events().PostAsync(content, cancellation: CancellationToken);
         result.IsSuccessful.Should().BeTrue();
         var typedResponse = result.Response.Should().BeOfType<Foo.Foo.Foo1.Events0.Post.Response.Accepted202.Empty>()

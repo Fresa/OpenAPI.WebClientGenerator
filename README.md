@@ -53,9 +53,8 @@ Supported data formats for the OpenAPI specification:
 
 4. Compile the project.
 5. Use the client:
-```
-using var httpclient = new HttpClient();
-var client = new Example.Foo(httpClient);
+```dotnet
+using var client = new Example.Foo(Servers.Production);
 ```
 
 ## Examples
