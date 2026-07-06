@@ -49,5 +49,6 @@ jobs:
       project_path: ${{ needs.test.outputs.project_path }}
       project_name: ${{ needs.test.outputs.project_name }}
       dotnet_version: ${{ needs.test.outputs.dotnet_version }}
+      include_github_release_notes: 'true'
     secrets:
       nuget_api_key: ${{ secrets.NUGET_API_KEY }}
