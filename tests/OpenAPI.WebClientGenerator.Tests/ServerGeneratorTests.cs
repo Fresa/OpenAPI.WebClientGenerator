@@ -1,6 +1,3 @@
-using System;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -71,7 +68,7 @@ public class ServerGeneratorTests(ITestOutputHelper testOutputHelper)
                 internal static readonly Server Production = new(new Uri("https://api.example.com", UriKind.RelativeOrAbsolute));
             }
             #nullable restore
-            """);
+            """.ReplaceLineEndings("\n"));
     }
 
     public static TheoryData<string> UnnamedServerSpecs =>
@@ -137,7 +134,7 @@ public class ServerGeneratorTests(ITestOutputHelper testOutputHelper)
                 internal static readonly Server Server0 = new(new Uri("https://api.example.com/v2", UriKind.RelativeOrAbsolute));
             }
             #nullable restore
-            """);
+            """.ReplaceLineEndings("\n"));
     }
 
     public static TheoryData<string> ServerWithVariablesSpecs =>
@@ -203,7 +200,7 @@ public class ServerGeneratorTests(ITestOutputHelper testOutputHelper)
                 }
             }
             #nullable restore
-            """);
+            """.ReplaceLineEndings("\n"));
     }
 
     public static TheoryData<string> ServerWithEnumVariableSpecs =>
@@ -278,7 +275,7 @@ public class ServerGeneratorTests(ITestOutputHelper testOutputHelper)
                 }
             }
             #nullable restore
-            """);
+            """.ReplaceLineEndings("\n"));
     }
 
     public static TheoryData<string> WithoutServersSpecs =>

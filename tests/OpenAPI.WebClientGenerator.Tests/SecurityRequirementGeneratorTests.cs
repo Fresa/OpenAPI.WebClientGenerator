@@ -89,7 +89,7 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
                 }
             }
             #nullable restore
-            """");
+            """".ReplaceLineEndings("\n"));
     }
 
     [Fact]
@@ -135,7 +135,7 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
                 }
             }
             #nullable restore
-            """");
+            """".ReplaceLineEndings("\n"));
     }
 
     [Fact]
@@ -195,7 +195,7 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
                 }
             }
             #nullable restore
-            """");
+            """".ReplaceLineEndings("\n"));
     }
 
     [Fact]
@@ -256,7 +256,7 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
                 }
             }
             #nullable restore
-            """");
+            """".ReplaceLineEndings("\n"));
     }
 
     [Fact]
@@ -305,7 +305,7 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
                 }
             }
             #nullable restore
-            """");
+            """".ReplaceLineEndings("\n"));
     }
 
     [Fact]
@@ -354,7 +354,7 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
                 }
             }
             #nullable restore
-            """");
+            """".ReplaceLineEndings("\n"));
     }
 
     [Fact]
@@ -400,7 +400,7 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
                 }
             }
             #nullable restore
-            """");
+            """".ReplaceLineEndings("\n"));
     }
 
     [Fact]
@@ -467,7 +467,7 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
                 }
             }
             #nullable restore
-            """");
+            """".ReplaceLineEndings("\n"));
     }
 
     [Fact]
@@ -528,7 +528,7 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
                 }
             }
             #nullable restore
-            """");
+            """".ReplaceLineEndings("\n"));
     }
 
     [Fact]
@@ -565,6 +565,6 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
                 }
             }
             #nullable restore
-            """);
+            """.ReplaceLineEndings("\n"));
     }
 }
