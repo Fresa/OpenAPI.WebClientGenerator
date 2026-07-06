@@ -1,0 +1,22 @@
+name: Lint OpenAPI Specs
+
+on:
+  push:
+    branches:
+      - "**"
+    tags-ignore:
+      - '**'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install vacuum
+        run: curl -fsSL https://quobix.com/scripts/install_vacuum.sh | VERSION=0.29.1 sh
+
+      - name: Lint OpenAPI specs
+        run: |
+          shopt -s nullglob
+          vacuum lint tests/{*/,*/*/}openapi*.{json,yaml}
