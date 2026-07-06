@@ -68,7 +68,7 @@ internal static readonly Server {{ServerName(server, index)}} = new(new Uri("{{s
     private static string GenerateServerClass(OpenApiServer server, int index)
     {
         var url = server.Variables?.Aggregate(server.Url ?? string.Empty, (current, variable) =>
-            current.Replace($"{{{variable.Key}}}", $"{{{variable.Key.ToCamelCase()}}}")) ?? string.Empty;
+            current.Replace($"{{{variable.Key}}}", $"{{{ArgumentValue(variable)}}}"));
         return $$"""
 {{Comment(server, index)}}
 internal sealed class {{ServerName(server, index)}}({{Parameters(ServerName(server, index), server.Variables)}}) :
@@ -88,6 +88,14 @@ internal sealed class {{ServerName(server, index)}}({{Parameters(ServerName(serv
 
     private static string GenerateEnum(KeyValuePair<string, List<string>> @enum) =>
 $$"""
+private static readonly Dictionary<{{@enum.Key.ToPascalCase()}}, string> {{@enum.Key.ToPascalCase()}}Translation = [{{@enum.Value
+    .AggregateToString(value => 
+        $"""
+        [{value.ToPascalCase()}] = "{value}",
+        """)
+    .TrimEnd(',')
+    .Indent(4)}}
+];
 internal enum {{@enum.Key.ToPascalCase()}}
 {{{@enum.Value
     .AggregateToString(value => 
@@ -98,6 +106,14 @@ internal enum {{@enum.Key.ToPascalCase()}}
 }
 """;
 
+    private static string ArgumentValue(KeyValuePair<string, OpenApiServerVariable> variable)
+    {
+        var argumentName = variable.Key.ToCamelCase();
+        return variable.Value.Enum is null
+            ? argumentName
+            : $"{variable.Key.ToPascalCase()}Translation[{argumentName}]";
+    } 
+        
     private static string Parameters(string serverName, IDictionary<string, OpenApiServerVariable>? variables) =>
         string.Join(", ", variables?.Select(variable => variable.Value.Enum?.Any() == true
             ? $"{serverName}.{variable.Key.ToPascalCase()} {variable.Key.ToCamelCase()} = {serverName}.{variable.Key.ToPascalCase()}.{variable.Value.Default.ToPascalCase()}"

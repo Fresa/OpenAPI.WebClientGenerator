@@ -254,12 +254,22 @@ public class ServerGeneratorTests(ITestOutputHelper testOutputHelper)
                     internal Uri BaseUrl => baseUri;
                 }
 
+                /// <summary>
+                /// The Server0 server.
+                /// </summary>
                 internal static Server0 UseServer0(Server0.Region region = Server0.Region.Us) =>
                     new(region);
 
+                /// <summary>
+                /// The Server0 server.
+                /// </summary>
                 internal sealed class Server0(Server0.Region region = Server0.Region.Us) :
-                    Server(new Uri($"https://{region}.example.com", UriKind.RelativeOrAbsolute))
+                    Server(new Uri($"https://{RegionTranslation[region]}.example.com", UriKind.RelativeOrAbsolute))
                 {
+                    private static readonly Dictionary<Region, string> RegionTranslation = [
+                        [Us] = "us",
+                        [Eu] = "eu"
+                    ];
                     internal enum Region
                     {
                         Us,
