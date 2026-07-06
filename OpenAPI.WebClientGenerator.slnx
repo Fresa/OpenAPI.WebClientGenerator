@@ -1,4 +1,9 @@
 <Solution>
+  <Folder Name="/root/">
+    <File Path=".github/CODEOWNERS" />
+    <File Path=".github/workflows/cd.yml" />
+    <File Path=".github/workflows/lint-openapi.yml" />
+  </Folder>
   <Project Path="src/OpenAPI.WebClientGenerator/OpenAPI.WebClientGenerator.csproj" />
   <Project Path="tests/Example.OpenApi/Example.OpenApi.csproj" />
   <Project Path="tests/Example.OpenApi20.IntegrationTests/Example.OpenApi20.IntegrationTests.csproj" />
