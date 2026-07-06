@@ -16,12 +16,28 @@ using System.Net.Http;
 namespace {{Namespace}};
 
 /// <summary>
-/// Web client
+/// Create web client
 /// </summary>
+/// <param name="httpClient">The HTTP client used to send requests. Make sure to set base address to the root URL of the API server.</param>
+/// <param name="configuration">The web client configuration.</param>
 internal sealed partial class {{ClassName}}(
-    HttpClient httpClient, 
+    HttpClient httpClient,
     WebClientConfiguration? configuration = null)
 {
+    /// <summary>
+    /// Create web client
+    /// </summary>
+    /// <param name="server">The server the client sends requests to.</param>
+    /// <param name="configuration">The web client configuration.</param>
+    internal {{ClassName}}(
+        Servers.Server server,
+        WebClientConfiguration? configuration = null) : this(new HttpClient
+        {
+            BaseAddress = server.BaseUrl
+        }, configuration)
+    {
+    }
+
     private WebClientConfiguration _configuration = configuration ?? new();
 }
 #nullable restore
