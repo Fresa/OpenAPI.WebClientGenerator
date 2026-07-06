@@ -1,4 +1,6 @@
 using System;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -63,6 +65,9 @@ public class ServerGeneratorTests(ITestOutputHelper testOutputHelper)
                     internal Uri BaseUrl => baseUri;
                 }
 
+                /// <summary>
+                /// The production server.
+                /// </summary>
                 internal static readonly Server Production = new(new Uri("https://api.example.com", UriKind.RelativeOrAbsolute));
             }
             #nullable restore
@@ -126,6 +131,9 @@ public class ServerGeneratorTests(ITestOutputHelper testOutputHelper)
                     internal Uri BaseUrl => baseUri;
                 }
 
+                /// <summary>
+                /// The Server0 server.
+                /// </summary>
                 internal static readonly Server Server0 = new(new Uri("https://api.example.com/v2", UriKind.RelativeOrAbsolute));
             }
             #nullable restore
@@ -138,21 +146,21 @@ public class ServerGeneratorTests(ITestOutputHelper testOutputHelper)
         {
           "openapi": "3.0.0",
           "info": { "title": "Test", "version": "1.0.0" },
-          "servers": [ { "url": "https://{tenant}.example.com/{basePath}", "variables": { "tenant": { "default": "demo" }, "basePath": { "default": "v2" } } } ]
+          "servers": [ { "description": "The tenant server.", "url": "https://{tenant}.example.com/{basePath}", "variables": { "tenant": { "default": "demo" }, "basePath": { "default": "v2" } } } ]
         }
         """,
         """
         {
           "openapi": "3.1.0",
           "info": { "title": "Test", "version": "1.0.0" },
-          "servers": [ { "url": "https://{tenant}.example.com/{basePath}", "variables": { "tenant": { "default": "demo" }, "basePath": { "default": "v2" } } } ]
+          "servers": [ { "description": "The tenant server.", "url": "https://{tenant}.example.com/{basePath}", "variables": { "tenant": { "default": "demo" }, "basePath": { "default": "v2" } } } ]
         }
         """,
         """
         {
           "openapi": "3.2.0",
           "info": { "title": "Test", "version": "1.0.0" },
-          "servers": [ { "url": "https://{tenant}.example.com/{basePath}", "variables": { "tenant": { "default": "demo" }, "basePath": { "default": "v2" } } } ]
+          "servers": [ { "description": "The tenant server.", "url": "https://{tenant}.example.com/{basePath}", "variables": { "tenant": { "default": "demo" }, "basePath": { "default": "v2" } } } ]
         }
         """
     ];
@@ -180,9 +188,15 @@ public class ServerGeneratorTests(ITestOutputHelper testOutputHelper)
                     internal Uri BaseUrl => baseUri;
                 }
 
+                /// <summary>
+                /// The tenant server.
+                /// </summary>
                 internal static Server0 UseServer0(string tenant = "demo", string basePath = "v2") =>
                     new(tenant, basePath);
 
+                /// <summary>
+                /// The tenant server.
+                /// </summary>
                 internal sealed class Server0(string tenant = "demo", string basePath = "v2") :
                     Server(new Uri($"https://{tenant}.example.com/{basePath}", UriKind.RelativeOrAbsolute))
                 {

@@ -46,23 +46,31 @@ internal static class Servers
 """);
     }
 
-    private static string GenerateAccessor(OpenApiServer server, int index) =>
-        server.Variables?.Any() == true
+    private static string GenerateAccessor(OpenApiServer server, int index)
+    {
+        var accessor = server.Variables?.Any() == true
         ?
 $$"""
 internal static {{ServerName(server, index)}} Use{{ServerName(server, index)}}({{Parameters(ServerName(server, index), server.Variables)}}) =>
     new({{string.Join(", ", server.Variables.Keys.Select(key => key.ToCamelCase()))}});
 """
-        : 
+        :
 $$"""
 internal static readonly Server {{ServerName(server, index)}} = new(new Uri("{{server.Url}}", UriKind.RelativeOrAbsolute));
 """;
+
+        return $$"""
+{{Comment(server, index)}}
+{{accessor}}
+""";
+    }
 
     private static string GenerateServerClass(OpenApiServer server, int index)
     {
         var url = server.Variables?.Aggregate(server.Url ?? string.Empty, (current, variable) =>
             current.Replace($"{{{variable.Key}}}", $"{{{variable.Key.ToCamelCase()}}}")) ?? string.Empty;
         return $$"""
+{{Comment(server, index)}}
 internal sealed class {{ServerName(server, index)}}({{Parameters(ServerName(server, index), server.Variables)}}) :
     Server(new Uri($"{{url}}", UriKind.RelativeOrAbsolute))
 {{{server.Variables?
@@ -94,6 +102,11 @@ internal enum {{@enum.Key.ToPascalCase()}}
         string.Join(", ", variables?.Select(variable => variable.Value.Enum?.Any() == true
             ? $"{serverName}.{variable.Key.ToPascalCase()} {variable.Key.ToCamelCase()} = {serverName}.{variable.Key.ToPascalCase()}.{variable.Value.Default.ToPascalCase()}"
             : $"string {variable.Key.ToCamelCase()} = \"{variable.Value.Default}\"") ?? []);
+
+    private static string Comment(OpenApiServer server, int index) =>
+        (string.IsNullOrEmpty(server.Description)
+            ? $"The {ServerName(server, index)} server."
+            : server.Description).AsComment("summary");
 
     private static string ServerName(OpenApiServer server, int index) =>
         server.Name.ToPascalCase() is { Length: > 0 } name ? name : $"Server{index}";
