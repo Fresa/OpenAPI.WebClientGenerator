@@ -11,11 +11,6 @@ internal sealed class ServerGenerator(OpenApiDocument openApiDocument, string @n
 
     internal SourceCode? GenerateClass()
     {
-        if (!_servers.Any())
-        {
-            return null;
-        }
-
         return new SourceCode("Server.g.cs",
 $$"""
 #nullable enable

@@ -311,10 +311,28 @@ public class ServerGeneratorTests(ITestOutputHelper testOutputHelper)
 
     [Theory]
     [MemberData(nameof(WithoutServersSpecs))]
-    public void SpecificationWithoutServers_DoesNotGenerateServerFile(string spec)
+    public void SpecificationWithoutServers_GeneratesServer(string spec)
     {
-        Generate(spec, out var generatedFiles);
+        var source = Generate(spec, out _);
 
-        generatedFiles.Should().NotContain(ServerFile);
+        source.Should().Be(
+            """
+            #nullable enable
+            using System;
+
+            namespace Example;
+
+            internal static class Servers
+            {
+                internal class Server(Uri baseUri)
+                {
+                    /// <summary>
+                    /// The base uri of the server.
+                    /// </summary>
+                    internal Uri BaseUrl => baseUri;
+                }
+            }
+            #nullable restore
+            """);
     }
 }
