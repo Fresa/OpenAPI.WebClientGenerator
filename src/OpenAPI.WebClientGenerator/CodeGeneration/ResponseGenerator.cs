@@ -46,7 +46,7 @@ $$"""
 /// <summary>
 /// Contains the operation's response objects
 /// </summary>
-internal abstract partial class {{ClassName}}
+public abstract partial class {{ClassName}}
 {{{Enumerable.Range(1, 5).AggregateToStringAsIs(i =>
 $$"""
 
@@ -96,7 +96,7 @@ $"""
 """
 
 
-    internal interface IAcceptContent
+    public interface IAcceptContent
     {
         public abstract static MediaTypeWithQualityHeaderValue MediaType { get; }
     }
@@ -118,14 +118,14 @@ using System.Net.Http.Headers;
 namespace {{@namespace}};
 {{NestedClassGenerator.Wrap(nestingClassNames, () =>
 $$"""
-internal sealed class Accept
+public sealed class Accept
 {
     private Accept() {}
-    internal static Accept Content<T>()
+    public static Accept Content<T>()
         where T : {{ClassName}}.IAcceptContent =>
         new Accept().And<T>();
 
-    internal Accept And<T>()
+    public Accept And<T>()
         where T : {{ClassName}}.IAcceptContent
     {
         _mediaTypes.Add(T.MediaType);
@@ -154,9 +154,9 @@ $$"""
 /// <summary>
 /// Unknown response
 /// </summary>
-internal sealed class Unknown : {{ClassName}}
+public sealed class Unknown : {{ClassName}}
 {
-    internal Stream Content { get; }
+    public Stream Content { get; }
 
     private Unknown(Stream content, HttpResponseMessage response)
     {
@@ -179,7 +179,7 @@ internal sealed class Unknown : {{ClassName}}
     /// <summary>
     /// Response status code
     /// </summary>
-    internal HttpStatusCode StatusCode { get; private set; }
+    public HttpStatusCode StatusCode { get; private set; }
 
     /// <inheritdoc/>
     internal override ValidationContext Validate(ValidationLevel validationLevel) =>

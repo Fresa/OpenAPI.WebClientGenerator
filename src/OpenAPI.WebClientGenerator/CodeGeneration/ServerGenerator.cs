@@ -18,14 +18,14 @@ using System;
 
 namespace {{@namespace}};
 
-internal static class Servers
+public static class Servers
 {
-    internal class Server(Uri baseUri)
+    public class Server(Uri baseUri)
     {
         /// <summary>
         /// The base uri of the server.
         /// </summary>
-        internal Uri BaseUrl => baseUri;
+        public Uri BaseUrl => baseUri;
     }{{_servers.Select(GenerateAccessor)
         .Concat(_servers
             .Select((server, index) => (server, index))
@@ -46,12 +46,12 @@ internal static class Servers
         var accessor = server.Variables?.Any() == true
         ?
 $$"""
-internal static {{ServerName(server, index)}} Use{{ServerName(server, index)}}({{Parameters(ServerName(server, index), server.Variables)}}) =>
+public static {{ServerName(server, index)}} Use{{ServerName(server, index)}}({{Parameters(ServerName(server, index), server.Variables)}}) =>
     new({{string.Join(", ", server.Variables.Keys.Select(key => key.ToCamelCase()))}});
 """
         :
 $$"""
-internal static readonly Server {{ServerName(server, index)}} = new(new Uri("{{server.Url}}", UriKind.RelativeOrAbsolute));
+public static readonly Server {{ServerName(server, index)}} = new(new Uri("{{server.Url}}", UriKind.RelativeOrAbsolute));
 """;
 
         return $$"""
@@ -66,7 +66,7 @@ internal static readonly Server {{ServerName(server, index)}} = new(new Uri("{{s
             current.Replace($"{{{variable.Key}}}", $"{{{ArgumentValue(variable)}}}"));
         return $$"""
 {{Comment(server, index)}}
-internal sealed class {{ServerName(server, index)}}({{Parameters(ServerName(server, index), server.Variables)}}) :
+public sealed class {{ServerName(server, index)}}({{Parameters(ServerName(server, index), server.Variables)}}) :
     Server(new Uri($"{{url}}", UriKind.RelativeOrAbsolute))
 {{{server.Variables?
     .Where(variable => 
@@ -91,7 +91,7 @@ private static readonly Dictionary<{{@enum.Key.ToPascalCase()}}, string> {{@enum
     .TrimEnd(',')
     .Indent(4)}}
 ];
-internal enum {{@enum.Key.ToPascalCase()}}
+public enum {{@enum.Key.ToPascalCase()}}
 {{{@enum.Value
     .AggregateToString(value => 
         $"{value.ToPascalCase()},")

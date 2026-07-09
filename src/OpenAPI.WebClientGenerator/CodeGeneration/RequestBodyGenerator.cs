@@ -48,7 +48,7 @@ namespace {{@namespace}};
         
         return 
 $$$"""
-internal abstract class Content
+public abstract class Content
 {
     internal abstract string? MediaType { get; }
 

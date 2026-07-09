@@ -42,7 +42,7 @@ $$"""
 /// <summary>
 /// Request body for content {{ContentType}}
 /// </summary>
-internal sealed class {{ClassName}} : Content, IDisposable
+public sealed class {{ClassName}} : Content, IDisposable
 {
     private readonly {{ClassName}}Writer<{{_typeDeclaration.FullyQualifiedDotnetTypeName()}}> _content;
     private {{_typeDeclaration.FullyQualifiedDotnetTypeName()}}? _currentItem;
@@ -78,7 +78,7 @@ $"""
     /// <param name="item">Item to write</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>An awaitable validation context for the request. The item is only written if passing validation.</returns>
-    internal async ValueTask<ImmutableList<ValidationResult>> WriteItemAsync({{_typeDeclaration.FullyQualifiedDotnetTypeName()}} item, CancellationToken cancellationToken = default)
+    public async ValueTask<ImmutableList<ValidationResult>> WriteItemAsync({{_typeDeclaration.FullyQualifiedDotnetTypeName()}} item, CancellationToken cancellationToken = default)
     {
         _currentItem = item;
         var validationContext = _configuration.ValidateRequests ? 
@@ -133,7 +133,7 @@ $$"""
 /// <summary>
 /// Request for content {{ContentType}}
 /// </summary>
-internal sealed class {{ClassName}} : Content
+public sealed class {{ClassName}} : Content
 {
     private {{_typeDeclaration.FullyQualifiedDotnetTypeName()}} _content;
     

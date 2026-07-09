@@ -20,7 +20,7 @@ internal sealed class ResponseHeaderGenerator(
     internal string GenerateProperty() =>
         $$"""
           {{header.Description.AsComment("summary", "para")}}
-          internal {{_fullyQualifiedTypeIdentifier}}{{_nullableTypeAnnotation}} {{_propertyName}} => {{_fieldName}}.Value{{(header.Required ? "" : ".AsOptional()")}};
+          public {{_fullyQualifiedTypeIdentifier}}{{_nullableTypeAnnotation}} {{_propertyName}} => {{_fieldName}}.Value{{(header.Required ? "" : ".AsOptional()")}};
           """.TrimStart();
     internal string GenerateField() =>
         $$"""

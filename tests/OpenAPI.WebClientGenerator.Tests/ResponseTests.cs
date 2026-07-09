@@ -17,20 +17,20 @@ $$""""
 using Corvus.Json;
 
 namespace Example;
-internal partial class TestClient
+public partial class TestClient
 {
-    internal partial class Foo0
+    public partial class Foo0
     {
-        internal partial class Get
+        public partial class Get
         {
-            internal partial class Response
+            public partial class Response
             {
-                internal partial class {{parentClassName}}
+                public partial class {{parentClassName}}
                 {
                     /// <summary>
                     /// Response with empty content
                     /// </summary>
-                    internal sealed class Empty : {{parentClassName}}
+                    public sealed class Empty : {{parentClassName}}
                     {
                         private Empty(HttpResponseMessage response) : base(response)
                         {
@@ -63,20 +63,20 @@ using Corvus.Json;
 using System.Net;
 
 namespace Example;
-internal partial class TestClient
+public partial class TestClient
 {
-    internal partial class Foo0
+    public partial class Foo0
     {
-        internal partial class Get
+        public partial class Get
         {
-            internal partial class Response
+            public partial class Response
             {
                 /// <summary>
                 /// Unknown response
                 /// </summary>
-                internal sealed class Unknown : Response
+                public sealed class Unknown : Response
                 {
-                    internal Stream Content { get; }
+                    public Stream Content { get; }
 
                     private Unknown(Stream content, HttpResponseMessage response)
                     {
@@ -99,7 +99,7 @@ internal partial class TestClient
                     /// <summary>
                     /// Response status code
                     /// </summary>
-                    internal HttpStatusCode StatusCode { get; private set; }
+                    public HttpStatusCode StatusCode { get; private set; }
 
                     /// <inheritdoc/>
                     internal override ValidationContext Validate(ValidationLevel validationLevel) =>
@@ -145,16 +145,16 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 
 namespace Example;
-internal partial class TestClient
+public partial class TestClient
 {
-    internal partial class Foo0
+    public partial class Foo0
     {
-        internal partial class Get
+        public partial class Get
         {
             /// <summary>
             /// Contains the operation's response objects
             /// </summary>
-            internal abstract partial class Response
+            public abstract partial class Response
             {
                 /// <summary>
                 /// Check if status code is 1xx
@@ -248,20 +248,20 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 
 namespace Example;
-internal partial class TestClient
+public partial class TestClient
 {
-    internal partial class Foo0
+    public partial class Foo0
     {
-        internal partial class Get
+        public partial class Get
         {
-            internal partial class Response
+            public partial class Response
             {
                 /// <summary>
                 /// <para>
                 /// OK
                 /// </para>
                 /// </summary>
-                internal abstract partial class OK200 : Response
+                public abstract partial class OK200 : Response
                 {
                     protected OK200(HttpResponseMessage response)
                     {
@@ -274,7 +274,7 @@ internal partial class TestClient
                     /// <summary>
                     /// Response status code
                     /// </summary>
-                    internal HttpStatusCode StatusCode { get; private set; }
+                    public HttpStatusCode StatusCode { get; private set; }
 
                     /// <summary>
                     /// Bind content from http response
@@ -351,16 +351,16 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 
 namespace Example;
-internal partial class TestClient
+public partial class TestClient
 {
-    internal partial class Foo0
+    public partial class Foo0
     {
-        internal partial class Get
+        public partial class Get
         {
             /// <summary>
             /// Contains the operation's response objects
             /// </summary>
-            internal abstract partial class Response
+            public abstract partial class Response
             {
                 /// <summary>
                 /// Check if status code is 1xx
@@ -454,20 +454,20 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 
 namespace Example;
-internal partial class TestClient
+public partial class TestClient
 {
-    internal partial class Foo0
+    public partial class Foo0
     {
-        internal partial class Get
+        public partial class Get
         {
-            internal partial class Response
+            public partial class Response
             {
                 /// <summary>
                 /// <para>
                 /// Default response
                 /// </para>
                 /// </summary>
-                internal abstract partial class Default : Response
+                public abstract partial class Default : Response
                 {
                     protected Default(HttpResponseMessage response)
                     {
@@ -480,7 +480,7 @@ internal partial class TestClient
                     /// <summary>
                     /// Response status code
                     /// </summary>
-                    internal HttpStatusCode StatusCode { get; private set; }
+                    public HttpStatusCode StatusCode { get; private set; }
 
                     /// <summary>
                     /// Bind content from http response
@@ -568,16 +568,16 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 
 namespace Example;
-internal partial class TestClient
+public partial class TestClient
 {
-    internal partial class Foo0
+    public partial class Foo0
     {
-        internal partial class Get
+        public partial class Get
         {
             /// <summary>
             /// Contains the operation's response objects
             /// </summary>
-            internal abstract partial class Response
+            public abstract partial class Response
             {
                 /// <summary>
                 /// Check if status code is 1xx
@@ -653,7 +653,7 @@ internal partial class TestClient
                         _ => Response.Unknown.BindAsync(response, cancellationToken)
                     };
 
-                internal interface IAcceptContent
+                public interface IAcceptContent
                 {
                     public abstract static MediaTypeWithQualityHeaderValue MediaType { get; }
                 }
@@ -676,20 +676,20 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 
 namespace Example;
-internal partial class TestClient
+public partial class TestClient
 {
-    internal partial class Foo0
+    public partial class Foo0
     {
-        internal partial class Get
+        public partial class Get
         {
-            internal partial class Response
+            public partial class Response
             {
                 /// <summary>
                 /// <para>
                 /// OK
                 /// </para>
                 /// </summary>
-                internal abstract partial class OK200 : Response
+                public abstract partial class OK200 : Response
                 {
                     protected OK200(HttpResponseMessage response)
                     {
@@ -702,7 +702,7 @@ internal partial class TestClient
                     /// <summary>
                     /// Response status code
                     /// </summary>
-                    internal HttpStatusCode StatusCode { get; private set; }
+                    public HttpStatusCode StatusCode { get; private set; }
 
                     /// <summary>
                     /// Bind content from http response
@@ -749,22 +749,22 @@ internal partial class TestClient
 using Corvus.Json;
 
 namespace Example;
-internal partial class TestClient
+public partial class TestClient
 {
-    internal partial class Foo0
+    public partial class Foo0
     {
-        internal partial class Get
+        public partial class Get
         {
-            internal partial class Response
+            public partial class Response
             {
-                internal partial class OK200
+                public partial class OK200
                 {
                     /// <summary>
                     /// Response for unknown content
                     /// </summary>
-                    internal new sealed class Unknown : OK200
+                    public new sealed class Unknown : OK200
                     {
-                        internal Stream Content { get; }
+                        public Stream Content { get; }
 
                         private Unknown(Stream content, HttpResponseMessage response) : base(response)
                         {
@@ -803,22 +803,22 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 
 namespace Example;
-internal partial class TestClient
+public partial class TestClient
 {
-    internal partial class Foo0
+    public partial class Foo0
     {
-        internal partial class Get
+        public partial class Get
         {
-            internal partial class Response
+            public partial class Response
             {
-                internal partial class OK200
+                public partial class OK200
                 {
                     /// <summary>
                     /// Response for content application/json
                     /// </summary>
-                    internal sealed class ApplicationJson : OK200, IAcceptContent
+                    public sealed class ApplicationJson : OK200, IAcceptContent
                     {
-                        internal Example.Paths.Foo.Get.Responses._200.Content.ApplicationJson Content { get; }
+                        public Example.Paths.Foo.Get.Responses._200.Content.ApplicationJson Content { get; }
 
                         private ApplicationJson(JsonElement content, HttpResponseMessage response) :
                             base(response)
@@ -902,20 +902,20 @@ internal partial class TestClient
             using System.Text.Json;
             
             namespace Example;
-            internal partial class TestClient
+            public partial class TestClient
             {
-                internal partial class Foo0
+                public partial class Foo0
                 {
-                    internal partial class Get
+                    public partial class Get
                     {
-                        internal partial class Response
+                        public partial class Response
                         {
                             /// <summary>
                             /// <para>
                             /// OK
                             /// </para>
                             /// </summary>
-                            internal abstract partial class OK200 : Response
+                            public abstract partial class OK200 : Response
                             {
                                 protected OK200(HttpResponseMessage response)
                                 {
@@ -929,17 +929,17 @@ internal partial class TestClient
                                 /// <summary>
                                 /// Response status code
                                 /// </summary>
-                                internal HttpStatusCode StatusCode { get; private set; }
+                                public HttpStatusCode StatusCode { get; private set; }
             
                                 /// <summary>
                                 /// Response Headers
                                 /// </summary> 
-                                internal ResponseHeaders Headers { get; private set; }
+                                public ResponseHeaders Headers { get; private set; }
             
                                 /// <summary>
                                 /// Response Headers
                                 /// </summary> 
-                                internal sealed class ResponseHeaders 
+                                public sealed class ResponseHeaders 
                                 {
                                     private readonly BindResult<Corvus.Json.JsonString> _location;
 
@@ -961,7 +961,7 @@ internal partial class TestClient
                                     internal static ResponseHeaders Bind(HttpResponseMessage response) =>
                                         new ResponseHeaders(response);
 
-                                    internal Corvus.Json.JsonString Location => _location.Value;
+                                    public Corvus.Json.JsonString Location => _location.Value;
 
                                     internal ValidationContext Validate(ValidationContext validationContext,
                                         ValidationLevel validationLevel)
@@ -1053,22 +1053,22 @@ using System.Collections.Generic;
 using System.Net.Http.Headers;
 
 namespace Example;
-internal partial class TestClient
+public partial class TestClient
 {
-    internal partial class Foo0
+    public partial class Foo0
     {
-        internal partial class Get
+        public partial class Get
         {
-            internal partial class Response
+            public partial class Response
             {
-                internal sealed class Accept
+                public sealed class Accept
                 {
                     private Accept() {}
-                    internal static Accept Content<T>()
+                    public static Accept Content<T>()
                         where T : Response.IAcceptContent =>
                         new Accept().And<T>();
 
-                    internal Accept And<T>()
+                    public Accept And<T>()
                         where T : Response.IAcceptContent
                     {
                         _mediaTypes.Add(T.MediaType);

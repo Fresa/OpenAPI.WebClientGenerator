@@ -23,7 +23,7 @@ namespace {{@namespace}};
 
     private string GenerateClass() =>
 $$"""
-internal abstract partial class SecurityRequirement
+public abstract partial class SecurityRequirement
 {{{securityRequirementObjects.AggregateToString(securityRequirementObject =>
 $$"""
 {{(securityRequirementObject.Count switch
@@ -41,7 +41,7 @@ $$"""
 
     private static string GenerateAnonymous() =>
 """
-internal sealed partial class Anonymous : SecurityRequirement
+public sealed partial class Anonymous : SecurityRequirement
 {
     internal override void AddTo(RequestBuilder requestBuilder) { }
 }
@@ -80,12 +80,12 @@ internal sealed partial class Anonymous : SecurityRequirement
         {
             return
 $$"""
-internal sealed partial class {{className}} : SecurityRequirement
+public sealed partial class {{className}} : SecurityRequirement
 {{{GenerateScopes(scopes)}}
     /// <summary>
     /// The key is inferred from the "{{parameter.ParameterName}}" request {{parameter.Location.GetDisplayName()}} parameter.
     /// </summary>
-    internal {{className}}()
+    public {{className}}()
     {
     }
 
@@ -103,11 +103,11 @@ $$"""
 """;
         return
 $$""""
-internal sealed partial class {{className}} : SecurityRequirement
+public sealed partial class {{className}} : SecurityRequirement
 {{{GenerateScopes(scopes)}}
     private readonly SecuritySchemes.{{schemeClassName}} _scheme;
 
-    internal {{className}}({{SecurityScheme.ApiKey.Key.GetMethodParameter()}}) =>
+    public {{className}}({{SecurityScheme.ApiKey.Key.GetMethodParameter()}}) =>
         _scheme = new SecuritySchemes.{{schemeClassName}}({{SecurityScheme.ApiKey.Key.Name}}, false, string.Empty,
             """
             {{specification.Indent(12).Trim()}}
@@ -123,11 +123,11 @@ internal sealed partial class {{className}} : SecurityRequirement
         string schemeClassName,
         List<string> scopes) =>
 $$"""
-internal sealed partial class {{className}} : SecurityRequirement
+public sealed partial class {{className}} : SecurityRequirement
 {{{GenerateScopes(scopes)}}
     private readonly SecuritySchemes.{{schemeClassName}} _scheme;
 
-    internal {{className}}({{SecurityScheme.Http.Username.GetMethodParameter()}}, {{SecurityScheme.Http.Password.GetMethodParameter()}}) =>
+    public {{className}}({{SecurityScheme.Http.Username.GetMethodParameter()}}, {{SecurityScheme.Http.Password.GetMethodParameter()}}) =>
         _scheme = new SecuritySchemes.{{schemeClassName}}({{SecurityScheme.Http.Username.Name}}, {{SecurityScheme.Http.Password.Name}});
 
     internal override void AddTo(RequestBuilder requestBuilder) => _scheme.AddTo(requestBuilder);
@@ -139,11 +139,11 @@ internal sealed partial class {{className}} : SecurityRequirement
         string schemeClassName, 
         List<string> scopes) =>
 $$"""
-internal sealed partial class {{className}} : SecurityRequirement
+public sealed partial class {{className}} : SecurityRequirement
 {{{GenerateScopes(scopes)}}
     private readonly SecuritySchemes.{{schemeClassName}} _scheme;
 
-    internal {{className}}({{SecurityScheme.Bearer.Token.GetMethodParameter()}}) =>
+    public {{className}}({{SecurityScheme.Bearer.Token.GetMethodParameter()}}) =>
         _scheme = new SecuritySchemes.{{schemeClassName}}({{SecurityScheme.Bearer.Token.Name}});
 
     internal override void AddTo(RequestBuilder requestBuilder) => _scheme.AddTo(requestBuilder);
@@ -152,11 +152,11 @@ internal sealed partial class {{className}} : SecurityRequirement
 
     private static string GenerateMutualTlsRequirement(string className, string schemeClassName, List<string> scopes) =>
 $$"""
-internal sealed partial class {{className}} : SecurityRequirement
+public sealed partial class {{className}} : SecurityRequirement
 {{{GenerateScopes(scopes)}}
     private readonly SecuritySchemes.{{schemeClassName}} _scheme;
 
-    internal {{className}}() =>
+    public {{className}}() =>
         _scheme = new SecuritySchemes.{{schemeClassName}}();
 
     internal override void AddTo(RequestBuilder requestBuilder) => _scheme.AddTo(requestBuilder);
@@ -165,11 +165,11 @@ internal sealed partial class {{className}} : SecurityRequirement
 
     private static string GenerateCustomRequirement(string className, string schemeClassName, List<string> scopes) =>
 $$"""
-internal sealed partial class {{className}} : SecurityRequirement
+public sealed partial class {{className}} : SecurityRequirement
 {{{GenerateScopes(scopes)}}
     private readonly SecuritySchemes.{{schemeClassName}} _scheme;
 
-    internal {{className}}({{SecurityScheme.Custom.Apply.GetMethodParameter()}}) =>
+    public {{className}}({{SecurityScheme.Custom.Apply.GetMethodParameter()}}) =>
         _scheme = new SecuritySchemes.{{schemeClassName}}({{SecurityScheme.Custom.Apply.Name}});
 
     internal override void AddTo(RequestBuilder requestBuilder) => _scheme.AddTo(requestBuilder);
@@ -180,10 +180,10 @@ internal sealed partial class {{className}} : SecurityRequirement
         scopes.Any() ? 
 $$"""
 
-    internal static class Scopes
+    public static class Scopes
     {{{scopes.AggregateToString(scope =>
 $"""
-        internal const string {scope.ToPascalCase()} = "{scope}";
+        public const string {scope.ToPascalCase()} = "{scope}";
 """)}}
     }
 
@@ -200,17 +200,17 @@ $"""
                     pair => pair.Value.Scopes);
         return
 $$"""
-internal sealed partial class {{className}} : SecurityRequirement
+public sealed partial class {{className}} : SecurityRequirement
 {{{(scopesPerSecurityRequirement.Any() ?
 $$"""
 
-    internal static class Scopes
+    public static class Scopes
     {{{scopesPerSecurityRequirement.AggregateToString(securityRequirement =>
 $$"""
-        internal static class {{securityRequirement.Key}}
+        public static class {{securityRequirement.Key}}
         {{{securityRequirement.Value.AggregateToString(scope =>
 $"""
-            internal const string {scope.ToPascalCase()} = "{scope}";
+            public const string {scope.ToPascalCase()} = "{scope}";
 """)}}
         }
 
@@ -223,7 +223,7 @@ $"""
   var schemeClassName = GetSecurityRequirementClassName(securityRequirement.Key);
   return
 $$"""
-    internal required SecuritySchemes.{{schemeClassName}} {{schemeClassName}} { init; get; }
+    public required SecuritySchemes.{{schemeClassName}} {{schemeClassName}} { init; get; }
 """;
 })}}
 

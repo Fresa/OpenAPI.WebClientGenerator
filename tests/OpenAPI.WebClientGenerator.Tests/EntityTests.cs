@@ -49,17 +49,26 @@ using System.Net.Http.Headers;
 using System.Text;
 
 namespace Example;
-internal partial class Pets
+public partial class Pets
 {
-    internal Pets0 Pets_()
+    public Pets0 Pets_()
     {
         var requestBuilder = new RequestBuilder(httpClient, _configuration);
         return new(requestBuilder, _configuration);
     }
 
-    internal partial class Pets0(RequestBuilder requestBuilder, WebClientConfiguration configuration)
+    public partial class Pets0
     {
-        internal async Task<Result<Get.Response>> GetAsync(
+        private readonly RequestBuilder requestBuilder;
+        private readonly WebClientConfiguration configuration;
+
+        internal Pets0(RequestBuilder requestBuilder, WebClientConfiguration configuration)
+        {
+            this.requestBuilder = requestBuilder;
+            this.configuration = configuration;
+        }
+
+        public async Task<Result<Get.Response>> GetAsync(
             CancellationToken cancellation = default)
         {
             if (!requestBuilder.ValidationContext.IsValid)
@@ -82,7 +91,7 @@ internal partial class Pets
         }
     }
 
-    internal Pets1 Pets_(
+    public Pets1 Pets_(
         Corvus.Json.JsonString petId)
     {
         var requestBuilder = new RequestBuilder(httpClient, _configuration);
@@ -102,9 +111,18 @@ internal partial class Pets
         return new(requestBuilder, _configuration);
     }
 
-    internal partial class Pets1(RequestBuilder requestBuilder, WebClientConfiguration configuration)
+    public partial class Pets1
     {
-        internal async Task<Result<Get.Response>> GetAsync(
+        private readonly RequestBuilder requestBuilder;
+        private readonly WebClientConfiguration configuration;
+
+        internal Pets1(RequestBuilder requestBuilder, WebClientConfiguration configuration)
+        {
+            this.requestBuilder = requestBuilder;
+            this.configuration = configuration;
+        }
+
+        public async Task<Result<Get.Response>> GetAsync(
             CancellationToken cancellation = default)
         {
             if (!requestBuilder.ValidationContext.IsValid)
@@ -164,17 +182,26 @@ using System.Net.Http.Headers;
 using System.Text;
 
 namespace Example;
-internal partial class TestClient
+public partial class TestClient
 {
-    internal Foo0 Foo()
+    public Foo0 Foo()
     {
         var requestBuilder = new RequestBuilder(httpClient, _configuration);
         return new(requestBuilder, _configuration);
     }
 
-    internal partial class Foo0(RequestBuilder requestBuilder, WebClientConfiguration configuration)
+    public partial class Foo0
     {
-        internal async Task<Result<Get.Response>> GetAsync(
+        private readonly RequestBuilder requestBuilder;
+        private readonly WebClientConfiguration configuration;
+
+        internal Foo0(RequestBuilder requestBuilder, WebClientConfiguration configuration)
+        {
+            this.requestBuilder = requestBuilder;
+            this.configuration = configuration;
+        }
+
+        public async Task<Result<Get.Response>> GetAsync(
             CancellationToken cancellation = default)
         {
             if (!requestBuilder.ValidationContext.IsValid)
@@ -210,17 +237,26 @@ using System.Net.Http.Headers;
 using System.Text;
 
 namespace Example;
-internal partial class TestClient
+public partial class TestClient
 {
-    internal Bar0 Bar()
+    public Bar0 Bar()
     {
         var requestBuilder = new RequestBuilder(httpClient, _configuration);
         return new(requestBuilder, _configuration);
     }
 
-    internal partial class Bar0(RequestBuilder requestBuilder, WebClientConfiguration configuration)
+    public partial class Bar0
     {
-        internal async Task<Result<Get.Response>> GetAsync(
+        private readonly RequestBuilder requestBuilder;
+        private readonly WebClientConfiguration configuration;
+
+        internal Bar0(RequestBuilder requestBuilder, WebClientConfiguration configuration)
+        {
+            this.requestBuilder = requestBuilder;
+            this.configuration = configuration;
+        }
+
+        public async Task<Result<Get.Response>> GetAsync(
             CancellationToken cancellation = default)
         {
             if (!requestBuilder.ValidationContext.IsValid)
@@ -256,17 +292,26 @@ using System.Net.Http.Headers;
 using System.Text;
 
 namespace Example;
-internal partial class TestClient
+public partial class TestClient
 {
-    internal Baz0 Baz()
+    public Baz0 Baz()
     {
         var requestBuilder = new RequestBuilder(httpClient, _configuration);
         return new(requestBuilder, _configuration);
     }
 
-    internal partial class Baz0(RequestBuilder requestBuilder, WebClientConfiguration configuration)
+    public partial class Baz0
     {
-        internal async Task<Result<Get.Response>> GetAsync(
+        private readonly RequestBuilder requestBuilder;
+        private readonly WebClientConfiguration configuration;
+
+        internal Baz0(RequestBuilder requestBuilder, WebClientConfiguration configuration)
+        {
+            this.requestBuilder = requestBuilder;
+            this.configuration = configuration;
+        }
+
+        public async Task<Result<Get.Response>> GetAsync(
             CancellationToken cancellation = default)
         {
             if (!requestBuilder.ValidationContext.IsValid)
@@ -331,9 +376,9 @@ using System.Net.Http.Headers;
 using System.Text;
 
 namespace Example;
-internal partial class TestClient
+public partial class TestClient
 {
-    internal Items1 Items(
+    public Items1 Items(
         Corvus.Json.JsonString id)
     {
         var requestBuilder = new RequestBuilder(httpClient, _configuration);
@@ -353,9 +398,18 @@ internal partial class TestClient
         return new(requestBuilder, _configuration);
     }
 
-    internal partial class Items1(RequestBuilder requestBuilder, WebClientConfiguration configuration)
+    public partial class Items1
     {
-        internal async Task<Result<Get.Response>> GetAsync(
+        private readonly RequestBuilder requestBuilder;
+        private readonly WebClientConfiguration configuration;
+
+        internal Items1(RequestBuilder requestBuilder, WebClientConfiguration configuration)
+        {
+            this.requestBuilder = requestBuilder;
+            this.configuration = configuration;
+        }
+
+        public async Task<Result<Get.Response>> GetAsync(
             CancellationToken cancellation = default)
         {
             if (!requestBuilder.ValidationContext.IsValid)
@@ -377,7 +431,7 @@ internal partial class TestClient
                 .WithLocation(configuration.OpenApiSpecificationUri));
         }
 
-        internal async Task<Result<Put.Response>> PutAsync(
+        public async Task<Result<Put.Response>> PutAsync(
             CancellationToken cancellation = default)
         {
             if (!requestBuilder.ValidationContext.IsValid)
@@ -399,7 +453,7 @@ internal partial class TestClient
                 .WithLocation(configuration.OpenApiSpecificationUri));
         }
 
-        internal async Task<Result<Delete.Response>> DeleteAsync(
+        public async Task<Result<Delete.Response>> DeleteAsync(
             CancellationToken cancellation = default)
         {
             if (!requestBuilder.ValidationContext.IsValid)
@@ -462,9 +516,9 @@ using System.Net.Http.Headers;
 using System.Text;
 
 namespace Example;
-internal partial class TestClient
+public partial class TestClient
 {
-    internal Parent1 Parent(
+    public Parent1 Parent(
         Corvus.Json.JsonString id)
     {
         var requestBuilder = new RequestBuilder(httpClient, _configuration);
@@ -484,8 +538,17 @@ internal partial class TestClient
         return new(requestBuilder, _configuration);
     }
 
-    internal partial class Parent1(RequestBuilder requestBuilder, WebClientConfiguration configuration)
+    public partial class Parent1
     {
+        private readonly RequestBuilder requestBuilder;
+        private readonly WebClientConfiguration configuration;
+
+        internal Parent1(RequestBuilder requestBuilder, WebClientConfiguration configuration)
+        {
+            this.requestBuilder = requestBuilder;
+            this.configuration = configuration;
+        }
+
     }
 }
 #nullable restore
@@ -501,18 +564,27 @@ using System.Net.Http.Headers;
 using System.Text;
 
 namespace Example;
-internal partial class TestClient
+public partial class TestClient
 {
-    internal partial class Parent1
+    public partial class Parent1
     {
-        internal Child0 Child()
+        public Child0 Child()
         {
             return new(requestBuilder, configuration);
         }
 
-        internal partial class Child0(RequestBuilder requestBuilder, WebClientConfiguration configuration)
+        public partial class Child0
         {
-            internal async Task<Result<Get.Response>> GetAsync(
+            private readonly RequestBuilder requestBuilder;
+            private readonly WebClientConfiguration configuration;
+
+            internal Child0(RequestBuilder requestBuilder, WebClientConfiguration configuration)
+            {
+                this.requestBuilder = requestBuilder;
+                this.configuration = configuration;
+            }
+
+            public async Task<Result<Get.Response>> GetAsync(
                 CancellationToken cancellation = default)
             {
                 if (!requestBuilder.ValidationContext.IsValid)
@@ -576,9 +648,9 @@ using System.Net.Http.Headers;
 using System.Text;
 
 namespace Example;
-internal partial class TestClient
+public partial class TestClient
 {
-    internal Items1 Items(
+    public Items1 Items(
         Corvus.Json.JsonString id)
     {
         var requestBuilder = new RequestBuilder(httpClient, _configuration);
@@ -598,9 +670,18 @@ internal partial class TestClient
         return new(requestBuilder, _configuration);
     }
 
-    internal partial class Items1(RequestBuilder requestBuilder, WebClientConfiguration configuration)
+    public partial class Items1
     {
-        internal async Task<Result<Get.Response>> GetAsync(
+        private readonly RequestBuilder requestBuilder;
+        private readonly WebClientConfiguration configuration;
+
+        internal Items1(RequestBuilder requestBuilder, WebClientConfiguration configuration)
+        {
+            this.requestBuilder = requestBuilder;
+            this.configuration = configuration;
+        }
+
+        public async Task<Result<Get.Response>> GetAsync(
             CancellationToken cancellation = default)
         {
             if (!requestBuilder.ValidationContext.IsValid)
@@ -670,17 +751,26 @@ internal partial class TestClient
             using System.Text;
             
             namespace Example;
-            internal partial class TestClient
+            public partial class TestClient
             {
-                internal Items0 Items()
+                public Items0 Items()
                 {
                     var requestBuilder = new RequestBuilder(httpClient, _configuration);
                     return new(requestBuilder, _configuration);
                 }
             
-                internal partial class Items0(RequestBuilder requestBuilder, WebClientConfiguration configuration)
+                public partial class Items0
                 {
-                    internal async Task<Result<Post.Response>> PostAsync(Post.Content content,
+                    private readonly RequestBuilder requestBuilder;
+                    private readonly WebClientConfiguration configuration;
+
+                    internal Items0(RequestBuilder requestBuilder, WebClientConfiguration configuration)
+                    {
+                        this.requestBuilder = requestBuilder;
+                        this.configuration = configuration;
+                    }
+
+                    public async Task<Result<Post.Response>> PostAsync(Post.Content content,
                         CancellationToken cancellation = default)
                     {
                         if (!requestBuilder.ValidationContext.IsValid)
@@ -716,13 +806,13 @@ internal partial class TestClient
             using System.Text;
             
             namespace Example;
-            internal partial class TestClient
+            public partial class TestClient
             {
-                internal partial class Items0
+                public partial class Items0
                 {
-                    internal partial class Post
+                    public partial class Post
                     {
-                        internal abstract class Content
+                        public abstract class Content
                         {
                             internal abstract string? MediaType { get; }
             
@@ -747,7 +837,7 @@ internal partial class TestClient
                             /// <summary>
                             /// Request for content application/json
                             /// </summary>
-                            internal sealed class ApplicationJson : Content
+                            public sealed class ApplicationJson : Content
                             {
                                 private Example.Paths.Items.Post.RequestBody.Content.ApplicationJson _content;
             
@@ -826,17 +916,26 @@ internal partial class TestClient
             using System.Text;
 
             namespace Example;
-            internal partial class TestClient
+            public partial class TestClient
             {
-                internal Items0 Items()
+                public Items0 Items()
                 {
                     var requestBuilder = new RequestBuilder(httpClient, _configuration);
                     return new(requestBuilder, _configuration);
                 }
 
-                internal partial class Items0(RequestBuilder requestBuilder, WebClientConfiguration configuration)
+                public partial class Items0
                 {
-                    internal async Task<Result<Post.Response>> PostAsync(Post.Content? content = null,
+                    private readonly RequestBuilder requestBuilder;
+                    private readonly WebClientConfiguration configuration;
+
+                    internal Items0(RequestBuilder requestBuilder, WebClientConfiguration configuration)
+                    {
+                        this.requestBuilder = requestBuilder;
+                        this.configuration = configuration;
+                    }
+
+                    public async Task<Result<Post.Response>> PostAsync(Post.Content? content = null,
                         CancellationToken cancellation = default)
                     {
                         if (!requestBuilder.ValidationContext.IsValid)
@@ -904,7 +1003,7 @@ internal partial class TestClient
 
         source.Should().Contain(
             """
-                    internal async Task<Result<Post.Response>> PostAsync(Post.Query query,
+                    public async Task<Result<Post.Response>> PostAsync(Post.Query query,
                         Post.Header? header = null,
                         Post.Content? content = null,
                         CancellationToken cancellation = default)
@@ -953,17 +1052,26 @@ using System.Net.Http.Headers;
 using System.Text;
 
 namespace Example;
-internal partial class TestClient
+public partial class TestClient
 {
-    internal Items0 Items()
+    public Items0 Items()
     {
         var requestBuilder = new RequestBuilder(httpClient, _configuration);
         return new(requestBuilder, _configuration);
     }
 
-    internal partial class Items0(RequestBuilder requestBuilder, WebClientConfiguration configuration)
+    public partial class Items0
     {
-        internal async Task<Result<Get.Response>> GetAsync(Get.Query query,
+        private readonly RequestBuilder requestBuilder;
+        private readonly WebClientConfiguration configuration;
+
+        internal Items0(RequestBuilder requestBuilder, WebClientConfiguration configuration)
+        {
+            this.requestBuilder = requestBuilder;
+            this.configuration = configuration;
+        }
+
+        public async Task<Result<Get.Response>> GetAsync(Get.Query query,
             CancellationToken cancellation = default)
         {
             query.AddTo(requestBuilder);
@@ -1003,16 +1111,16 @@ using System.Net.Http.Headers;
 using System.Text;
 
 namespace Example;
-internal partial class TestClient
+public partial class TestClient
 {
-    internal partial class Items0
+    public partial class Items0
     {
-        internal partial class Get
+        public partial class Get
         {
-            internal sealed class Query
+            public sealed class Query
             {
-                internal required Corvus.Json.JsonInteger Limit { get; init; }
-                internal Corvus.Json.JsonString? Filter { get; init; }
+                public required Corvus.Json.JsonInteger Limit { get; init; }
+                public Corvus.Json.JsonString? Filter { get; init; }
 
                 internal RequestBuilder AddTo(RequestBuilder requestBuilder)
                 {

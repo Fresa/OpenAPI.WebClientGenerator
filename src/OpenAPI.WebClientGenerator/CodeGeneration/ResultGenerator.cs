@@ -16,7 +16,7 @@ namespace {{@namespace}};
 /// The result of an operation
 /// </summary>
 /// <typeparam name="T">The response type</typeparam>
-internal sealed class {{ClassName}}<T>
+public sealed class {{ClassName}}<T>
 {
     private {{ClassName}}(ImmutableList<ValidationResult> requestValidationResults)
     {
@@ -42,25 +42,25 @@ internal sealed class {{ClassName}}<T>
     /// <summary>
     /// The response or null if <see cref="FailedRequestValidation"/> is true
     /// </summary>
-    internal T? Response { get; }
+    public T? Response { get; }
 
     /// <summary>
     /// Validation results for the request if <see cref="FailedRequestValidation"/> is true, otherwise validation results for the response
     /// </summary>
-    internal ImmutableList<ValidationResult> ValidationResults { get; }
+    public ImmutableList<ValidationResult> ValidationResults { get; }
     
     /// <summary>
     /// True if request failed validation.
     /// Note: The request was never sent if it failed validation.
     /// </summary>
     [MemberNotNullWhen(false, nameof(Response))]
-    internal bool FailedRequestValidation { get; }
+    public bool FailedRequestValidation { get; }
     
     /// <summary>
     /// True if the operation was executed successfully.
     /// </summary>
     [MemberNotNullWhen(true, nameof(Response))]
-    internal bool IsSuccessful { get; }
+    public bool IsSuccessful { get; }
 }
 #nullable restore
 """);

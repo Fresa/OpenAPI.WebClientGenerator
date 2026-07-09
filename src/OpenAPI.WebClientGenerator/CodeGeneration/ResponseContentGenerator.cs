@@ -94,7 +94,7 @@ namespace {{@namespace}};
 {{NestedClassGenerator.Wrap(nestingClassNames, () =>
 $$"""
 {{_response.Description.AsComment("summary", "para")}}
-internal abstract partial class {{ClassName}} : {{nestingClassNames.Last()}}
+public abstract partial class {{ClassName}} : {{nestingClassNames.Last()}}
 {
     protected {{ClassName}}(HttpResponseMessage response)
     {
@@ -111,19 +111,19 @@ $$"""
     /// <summary>
     /// Response status code
     /// </summary>
-    internal HttpStatusCode StatusCode { get; private set; }
-{{(_anyHeaders ? 
+    public HttpStatusCode StatusCode { get; private set; }
+{{(_anyHeaders ?
 $$"""
 
     /// <summary>
     /// Response Headers
     /// </summary> 
-    internal ResponseHeaders Headers { get; private set; }
+    public ResponseHeaders Headers { get; private set; }
 
     /// <summary>
     /// Response Headers
     /// </summary> 
-    internal sealed class ResponseHeaders 
+    public sealed class ResponseHeaders 
     {{{
         _headerGenerators.AggregateToString(generator =>
             generator.GenerateField()).Indent(8)}}
@@ -214,7 +214,7 @@ $$"""
 /// <summary>
 /// Response with empty content
 /// </summary>
-internal sealed class Empty : {{ClassName}}
+public sealed class Empty : {{ClassName}}
 {
     private Empty(HttpResponseMessage response) : base(response)
     {
@@ -250,9 +250,9 @@ $$"""
 /// <summary>
 /// Response for unknown content
 /// </summary>
-internal new sealed class Unknown : {{ClassName}}
+public new sealed class Unknown : {{ClassName}}
 {
-    internal Stream Content { get; }
+    public Stream Content { get; }
 
     private Unknown(Stream content, HttpResponseMessage response) : base(response)
     {

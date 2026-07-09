@@ -20,7 +20,7 @@ namespace {{Namespace}};
 /// </summary>
 /// <param name="httpClient">The HTTP client used to send requests. Make sure to set base address to the root URL of the API server.</param>
 /// <param name="configuration">The web client configuration.</param>
-internal sealed partial class {{ClassName}}(
+public sealed partial class {{ClassName}}(
     HttpClient httpClient,
     WebClientConfiguration? configuration = null) : IDisposable
 {
@@ -31,7 +31,7 @@ internal sealed partial class {{ClassName}}(
     /// </summary>
     /// <param name="server">The server the client sends requests to.</param>
     /// <param name="configuration">The web client configuration.</param>
-    internal {{ClassName}}(
+    public {{ClassName}}(
         Servers.Server server,
         WebClientConfiguration? configuration = null) : this(new HttpClient
         {

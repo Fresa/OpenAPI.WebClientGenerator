@@ -49,10 +49,10 @@ namespace {{@namespace}};
 
         return
 $$""""
-internal sealed class {{className}}
+public sealed class {{className}}
 {{{Parameters.AggregateToString(parameter =>
 $$"""
-    internal {{(parameter.IsParameterRequired ? "required " : "")}}{{parameter.FullyQualifiedTypeName}} {{parameter.ParameterName.ToPascalCase()}} { get; init; }
+    public {{(parameter.IsParameterRequired ? "required " : "")}}{{parameter.FullyQualifiedTypeName}} {{parameter.ParameterName.ToPascalCase()}} { get; init; }
 """)}}
 
     internal RequestBuilder AddTo(RequestBuilder requestBuilder)
