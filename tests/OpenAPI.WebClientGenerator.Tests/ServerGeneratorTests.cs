@@ -333,6 +333,6 @@ public class ServerGeneratorTests(ITestOutputHelper testOutputHelper)
                 }
             }
             #nullable restore
-            """);
+            """.ReplaceLineEndings("\n"));
     }
 }
