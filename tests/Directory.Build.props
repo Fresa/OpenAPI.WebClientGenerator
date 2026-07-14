@@ -1,0 +1,16 @@
+<Project>
+    <PropertyGroup>
+        <_ApiCompatGenerateContractAssembly>false</_ApiCompatGenerateContractAssembly>
+        <_ApiCompatCaptureGroupPattern>.+%5C$([System.IO.Path]::DirectorySeparatorChar)(.+)%5C$([System.IO.Path]::DirectorySeparatorChar)(.+)</_ApiCompatCaptureGroupPattern>
+    </PropertyGroup>
+
+    <Target Name="ApiCompatGenerateContractAssembly" AfterTargets="Build" Condition="'$(_ApiCompatGenerateContractAssembly)' == 'true' And $([System.Text.RegularExpressions.Regex]::IsMatch($(MSBuildProjectName), '^Example\.OpenApi\d+\.IntegrationTests$'))">
+        <Copy SourceFiles="$(IntermediateOutputPath)ref/$(AssemblyName).dll"
+              DestinationFolder="LastMajorVersionBinary" />
+    </Target>
+
+    <ItemGroup>
+        <!-- Generate OS-agnostic Right suppression directives -->
+        <ApiCompatRightAssembliesTransformationPattern Include="$(_ApiCompatCaptureGroupPattern)" ReplacementString="obj/$1/$2" />
+    </ItemGroup>
+</Project>

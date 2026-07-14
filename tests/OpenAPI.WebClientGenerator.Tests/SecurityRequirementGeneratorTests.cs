@@ -65,19 +65,19 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
             """"
             #nullable enable
             namespace Example;
-            internal partial class Foo
+            public partial class Foo
             {
-                internal partial class Foo0
+                public partial class Foo0
                 {
-                    internal partial class Get
+                    public partial class Get
                     {
-                        internal abstract partial class SecurityRequirement
+                        public abstract partial class SecurityRequirement
                         {
-                            internal sealed partial class BearerAuth : SecurityRequirement
+                            public sealed partial class BearerAuth : SecurityRequirement
                             {
                                 private readonly SecuritySchemes.BearerAuth _scheme;
 
-                                internal BearerAuth(string token) =>
+                                public BearerAuth(string token) =>
                                     _scheme = new SecuritySchemes.BearerAuth(token);
 
                                 internal override void AddTo(RequestBuilder requestBuilder) => _scheme.AddTo(requestBuilder);
@@ -109,18 +109,18 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
             """"
             #nullable enable
             namespace Example;
-            internal partial class Foo
+            public partial class Foo
             {
-                internal partial class Foo0
+                public partial class Foo0
                 {
-                    internal partial class Get
+                    public partial class Get
                     {
-                        internal abstract partial class SecurityRequirement
+                        public abstract partial class SecurityRequirement
                         {
-                            internal sealed partial class ApiKeyAuthAndBearerAuth : SecurityRequirement
+                            public sealed partial class ApiKeyAuthAndBearerAuth : SecurityRequirement
                             {
-                                internal required SecuritySchemes.ApiKeyAuth ApiKeyAuth { init; get; }
-                                internal required SecuritySchemes.BearerAuth BearerAuth { init; get; }
+                                public required SecuritySchemes.ApiKeyAuth ApiKeyAuth { init; get; }
+                                public required SecuritySchemes.BearerAuth BearerAuth { init; get; }
 
                                 internal override void AddTo(RequestBuilder requestBuilder)
                                 {
@@ -155,19 +155,19 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
             """"
             #nullable enable
             namespace Example;
-            internal partial class Foo
+            public partial class Foo
             {
-                internal partial class Foo0
+                public partial class Foo0
                 {
-                    internal partial class Get
+                    public partial class Get
                     {
-                        internal abstract partial class SecurityRequirement
+                        public abstract partial class SecurityRequirement
                         {
-                            internal sealed partial class ApiKeyAuth : SecurityRequirement
+                            public sealed partial class ApiKeyAuth : SecurityRequirement
                             {
                                 private readonly SecuritySchemes.ApiKeyAuth _scheme;
 
-                                internal ApiKeyAuth(Corvus.Json.JsonAny apiKey) =>
+                                public ApiKeyAuth(Corvus.Json.JsonAny apiKey) =>
                                     _scheme = new SecuritySchemes.ApiKeyAuth(apiKey, false, string.Empty,
                                         """
                                         {
@@ -179,11 +179,11 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
                                 internal override void AddTo(RequestBuilder requestBuilder) => _scheme.AddTo(requestBuilder);
                             }
 
-                            internal sealed partial class BearerAuth : SecurityRequirement
+                            public sealed partial class BearerAuth : SecurityRequirement
                             {
                                 private readonly SecuritySchemes.BearerAuth _scheme;
 
-                                internal BearerAuth(string token) =>
+                                public BearerAuth(string token) =>
                                     _scheme = new SecuritySchemes.BearerAuth(token);
 
                                 internal override void AddTo(RequestBuilder requestBuilder) => _scheme.AddTo(requestBuilder);
@@ -230,20 +230,20 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
             """"
             #nullable enable
             namespace Example;
-            internal partial class Foo
+            public partial class Foo
             {
-                internal partial class Foo0
+                public partial class Foo0
                 {
-                    internal partial class Get
+                    public partial class Get
                     {
-                        internal abstract partial class SecurityRequirement
+                        public abstract partial class SecurityRequirement
                         {
-                            internal sealed partial class ApiKeyAuth : SecurityRequirement
+                            public sealed partial class ApiKeyAuth : SecurityRequirement
                             {
                                 /// <summary>
                                 /// The key is inferred from the "X-API-Key" request header parameter.
                                 /// </summary>
-                                internal ApiKeyAuth()
+                                public ApiKeyAuth()
                                 {
                                 }
 
@@ -275,19 +275,19 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
             """"
             #nullable enable
             namespace Example;
-            internal partial class Foo
+            public partial class Foo
             {
-                internal partial class Foo0
+                public partial class Foo0
                 {
-                    internal partial class Get
+                    public partial class Get
                     {
-                        internal abstract partial class SecurityRequirement
+                        public abstract partial class SecurityRequirement
                         {
-                            internal sealed partial class ApiKeyAuth : SecurityRequirement
+                            public sealed partial class ApiKeyAuth : SecurityRequirement
                             {
                                 private readonly SecuritySchemes.ApiKeyAuth _scheme;
 
-                                internal ApiKeyAuth(Corvus.Json.JsonAny apiKey) =>
+                                public ApiKeyAuth(Corvus.Json.JsonAny apiKey) =>
                                     _scheme = new SecuritySchemes.ApiKeyAuth(apiKey, false, string.Empty,
                                         """
                                         {
@@ -328,18 +328,18 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
             """"
             #nullable enable
             namespace Example;
-            internal partial class Foo
+            public partial class Foo
             {
-                internal partial class Foo0
+                public partial class Foo0
                 {
-                    internal partial class Get
+                    public partial class Get
                     {
-                        internal abstract partial class SecurityRequirement
+                        public abstract partial class SecurityRequirement
                         {
-                            internal sealed partial class ApiKeyAuthAndBearerAuth : SecurityRequirement
+                            public sealed partial class ApiKeyAuthAndBearerAuth : SecurityRequirement
                             {
-                                internal required SecuritySchemes.ApiKeyAuth ApiKeyAuth { init; get; }
-                                internal required SecuritySchemes.BearerAuth BearerAuth { init; get; }
+                                public required SecuritySchemes.ApiKeyAuth ApiKeyAuth { init; get; }
+                                public required SecuritySchemes.BearerAuth BearerAuth { init; get; }
 
                                 internal override void AddTo(RequestBuilder requestBuilder)
                                 {
@@ -374,18 +374,18 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
             """"
             #nullable enable
             namespace Example;
-            internal partial class Foo
+            public partial class Foo
             {
-                internal partial class Foo0
+                public partial class Foo0
                 {
-                    internal partial class Get
+                    public partial class Get
                     {
-                        internal abstract partial class SecurityRequirement
+                        public abstract partial class SecurityRequirement
                         {
-                            internal sealed partial class ApiKeyAuthAndBearerAuth : SecurityRequirement
+                            public sealed partial class ApiKeyAuthAndBearerAuth : SecurityRequirement
                             {
-                                internal required SecuritySchemes.ApiKeyAuth ApiKeyAuth { init; get; }
-                                internal required SecuritySchemes.BearerAuth BearerAuth { init; get; }
+                                public required SecuritySchemes.ApiKeyAuth ApiKeyAuth { init; get; }
+                                public required SecuritySchemes.BearerAuth BearerAuth { init; get; }
 
                                 internal override void AddTo(RequestBuilder requestBuilder)
                                 {
@@ -432,27 +432,27 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
             """"
             #nullable enable
             namespace Example;
-            internal partial class Foo
+            public partial class Foo
             {
-                internal partial class Foo0
+                public partial class Foo0
                 {
-                    internal partial class Get
+                    public partial class Get
                     {
-                        internal abstract partial class SecurityRequirement
+                        public abstract partial class SecurityRequirement
                         {
-                            internal sealed partial class ApiKeyAuthAndOAuth2 : SecurityRequirement
+                            public sealed partial class ApiKeyAuthAndOAuth2 : SecurityRequirement
                             {
-                                internal static class Scopes
+                                public static class Scopes
                                 {
-                                    internal static class OAuth2
+                                    public static class OAuth2
                                     {
-                                        internal const string ReadFoo = "read:foo";
-                                        internal const string WriteFoo = "write:foo";
+                                        public const string ReadFoo = "read:foo";
+                                        public const string WriteFoo = "write:foo";
                                     }
                                 }
 
-                                internal required SecuritySchemes.ApiKeyAuth ApiKeyAuth { init; get; }
-                                internal required SecuritySchemes.OAuth2 OAuth2 { init; get; }
+                                public required SecuritySchemes.ApiKeyAuth ApiKeyAuth { init; get; }
+                                public required SecuritySchemes.OAuth2 OAuth2 { init; get; }
 
                                 internal override void AddTo(RequestBuilder requestBuilder)
                                 {
@@ -498,25 +498,25 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
             """"
             #nullable enable
             namespace Example;
-            internal partial class Foo
+            public partial class Foo
             {
-                internal partial class Foo0
+                public partial class Foo0
                 {
-                    internal partial class Get
+                    public partial class Get
                     {
-                        internal abstract partial class SecurityRequirement
+                        public abstract partial class SecurityRequirement
                         {
-                            internal sealed partial class OAuth2 : SecurityRequirement
+                            public sealed partial class OAuth2 : SecurityRequirement
                             {
-                                internal static class Scopes
+                                public static class Scopes
                                 {
-                                    internal const string ReadFoo = "read:foo";
-                                    internal const string WriteFoo = "write:foo";
+                                    public const string ReadFoo = "read:foo";
+                                    public const string WriteFoo = "write:foo";
                                 }
 
                                 private readonly SecuritySchemes.OAuth2 _scheme;
 
-                                internal OAuth2(string token) =>
+                                public OAuth2(string token) =>
                                     _scheme = new SecuritySchemes.OAuth2(token);
 
                                 internal override void AddTo(RequestBuilder requestBuilder) => _scheme.AddTo(requestBuilder);
@@ -546,15 +546,15 @@ public class SecurityRequirementGeneratorTests(ITestOutputHelper testOutputHelpe
             """
             #nullable enable
             namespace Example;
-            internal partial class Foo
+            public partial class Foo
             {
-                internal partial class Foo0
+                public partial class Foo0
                 {
-                    internal partial class Get
+                    public partial class Get
                     {
-                        internal abstract partial class SecurityRequirement
+                        public abstract partial class SecurityRequirement
                         {
-                            internal sealed partial class Anonymous : SecurityRequirement
+                            public sealed partial class Anonymous : SecurityRequirement
                             {
                                 internal override void AddTo(RequestBuilder requestBuilder) { }
                             }

@@ -37,7 +37,7 @@ namespace {{@namespace}};
 /// <summary>
 /// Defines security schemes that can be used by the operations
 /// </summary>
-internal static class SecuritySchemes
+public static class SecuritySchemes
 {{{_securitySchemes.AggregateToString(pair => GenerateScheme(pair.Key, pair.Value))}}
 }
 """);
@@ -62,12 +62,12 @@ internal static class SecuritySchemes
         var className = schemaName.ToPascalCase();
         return $$"""
 
-    internal const string {{className}}Key = "{{schemaName}}";
+    public const string {{className}}Key = "{{schemaName}}";
 {{GenerateSchemeComment(scheme).Indent(4)}}
-    internal sealed partial class {{className}}
+    public sealed partial class {{className}}
     {
         private readonly System.Action<RequestBuilder> _apply;
-        internal {{className}}({{SecurityScheme.ApiKey.Key.GetMethodParameter()}}, bool isRequired, string schemaLocation, string parameterSpecificationAsJson) =>
+        public {{className}}({{SecurityScheme.ApiKey.Key.GetMethodParameter()}}, bool isRequired, string schemaLocation, string parameterSpecificationAsJson) =>
             _apply = requestBuilder => requestBuilder.Add{{scheme.In?.GetDisplayName().ToPascalCase()}}<{{SecurityScheme.ApiKey.Key.Type}}>(Name, {{SecurityScheme.ApiKey.Key.Name}}, isRequired, schemaLocation, parameterSpecificationAsJson);
 
         internal void AddTo(RequestBuilder requestBuilder) => _apply(requestBuilder);
@@ -81,12 +81,12 @@ internal static class SecuritySchemes
         var className = schemaName.ToPascalCase();
         return $$"""
 
-    internal const string {{className}}Key = "{{schemaName}}";
+    public const string {{className}}Key = "{{schemaName}}";
 {{GenerateSchemeComment(scheme).Indent(4)}}
-    internal sealed partial class {{className}}
+    public sealed partial class {{className}}
     {
         private readonly System.Action<RequestBuilder> _apply;
-        internal {{className}}({{SecurityScheme.Http.Username.GetMethodParameter()}}, {{SecurityScheme.Http.Password.GetMethodParameter()}}) =>
+        public {{className}}({{SecurityScheme.Http.Username.GetMethodParameter()}}, {{SecurityScheme.Http.Password.GetMethodParameter()}}) =>
             _apply = requestBuilder => requestBuilder.AddHeader("Authorization", $"Basic {System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes($"{{{SecurityScheme.Http.Username.Name}}}:{{{SecurityScheme.Http.Password.Name}}}"))}");
 
         internal void AddTo(RequestBuilder requestBuilder) => _apply(requestBuilder);
@@ -100,12 +100,12 @@ internal static class SecuritySchemes
         var className = schemaName.ToPascalCase();
         return $$"""
 
-    internal const string {{className}}Key = "{{schemaName}}";
+    public const string {{className}}Key = "{{schemaName}}";
 {{GenerateSchemeComment(scheme).Indent(4)}}
-    internal sealed partial class {{className}}
+    public sealed partial class {{className}}
     {
         private readonly System.Action<RequestBuilder> _apply;
-        internal {{className}}({{SecurityScheme.Bearer.Token.GetMethodParameter()}}) =>
+        public {{className}}({{SecurityScheme.Bearer.Token.GetMethodParameter()}}) =>
             _apply = requestBuilder => requestBuilder.AddHeader("Authorization", $"Bearer {{{SecurityScheme.Bearer.Token.Name}}}");
 
         internal void AddTo(RequestBuilder requestBuilder) => _apply(requestBuilder);
@@ -119,12 +119,12 @@ internal static class SecuritySchemes
         var className = schemaName.ToPascalCase();
         return $$"""
 
-    internal const string {{className}}Key = "{{schemaName}}";
+    public const string {{className}}Key = "{{schemaName}}";
 {{GenerateSchemeComment(scheme).Indent(4)}}
-    internal sealed partial class {{className}}
+    public sealed partial class {{className}}
     {
         private readonly System.Action<RequestBuilder> _apply;
-        internal {{className}}({{SecurityScheme.Custom.Apply.GetMethodParameter()}}) =>
+        public {{className}}({{SecurityScheme.Custom.Apply.GetMethodParameter()}}) =>
             _apply = {{SecurityScheme.Custom.Apply.Name}};
 
         internal void AddTo(RequestBuilder requestBuilder) => _apply(requestBuilder);
@@ -138,12 +138,12 @@ internal static class SecuritySchemes
         var className = schemaName.ToPascalCase();
         return $$"""
 
-    internal const string {{className}}Key = "{{schemaName}}";
+    public const string {{className}}Key = "{{schemaName}}";
 {{GenerateSchemeComment(scheme).Indent(4)}}
-    internal sealed partial class {{className}}
+    public sealed partial class {{className}}
     {
         private readonly System.Action<RequestBuilder> _apply;
-        internal {{className}}() =>
+        public {{className}}() =>
             _apply = _ => { };
 
         internal void AddTo(RequestBuilder requestBuilder) => _apply(requestBuilder);
@@ -160,7 +160,7 @@ internal static class SecuritySchemes
             GenerateConst(nameof(scheme.BearerFormat), scheme.BearerFormat),
             GenerateConst(nameof(scheme.OpenIdConnectUrl), scheme.OpenIdConnectUrl?.ToString()),
             GenerateGetParameterMethods(scheme),
-            $"internal const bool {nameof(scheme.Deprecated)} = {scheme.Deprecated.ToString().ToLowerInvariant()};",
+            $"public const bool {nameof(scheme.Deprecated)} = {scheme.Deprecated.ToString().ToLowerInvariant()};",
             GenerateFlowsObject(nameof(scheme.Flows), scheme.Flows)
         }.RemoveEmptyLines().AggregateToString();
 
@@ -171,7 +171,7 @@ internal static class SecuritySchemes
         value == null
             ? string.Empty
             : $"""
-               internal const string {name} = "{value}";
+               public const string {name} = "{value}";
                """;
 
     private static string GenerateGetParameterMethods(IOpenApiSecurityScheme scheme)
@@ -192,7 +192,7 @@ $"""
     private static string GenerateFlowsObject(string className, OpenApiOAuthFlows? flows) =>
         flows == null ? string.Empty : 
 $$"""
-internal static class {{className}}
+public static class {{className}}
 {{{new []
 {
     GenerateFlowObject(nameof(flows.AuthorizationCode), flows.AuthorizationCode),
@@ -207,7 +207,7 @@ internal static class {{className}}
     private static string GenerateFlowObject(string className, OpenApiOAuthFlow? flow) =>
         flow == null ? string.Empty : 
 $$"""
-internal static class {{className}}
+public static class {{className}}
 {{{new []
 {
     GenerateConst(nameof(flow.AuthorizationUrl), flow.AuthorizationUrl?.ToString()),
@@ -216,7 +216,7 @@ internal static class {{className}}
     GenerateConst(nameof(flow.TokenUrl), flow.TokenUrl?.ToString()),
     flow.Scopes == null ? string.Empty : 
 $$"""
-internal static readonly ImmutableDictionary<string, string> {{nameof(flow.Scopes)}} = 
+public static readonly ImmutableDictionary<string, string> {{nameof(flow.Scopes)}} =
     ImmutableDictionary.CreateRange<string, string>([{{flow.Scopes.AggregateToString(scope => 
 $"""
         new("{scope.Key}", "{scope.Value}"),

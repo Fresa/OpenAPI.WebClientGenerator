@@ -18,7 +18,7 @@ namespace {{@namespace}};
 /// <summary>
 /// Base class for sequential json enumerable
 /// </summary>
-internal abstract class SequentialJsonEnumerable<T>(Stream stream, WebClientConfiguration configuration) : IAsyncEnumerable<(T, ImmutableList<ValidationResult>)> 
+public abstract class SequentialJsonEnumerable<T>(Stream stream, WebClientConfiguration configuration) : IAsyncEnumerable<(T, ImmutableList<ValidationResult>)>
     where T : struct, IJsonValue<T>
 {
     private int _itemPosition = -1;
@@ -124,8 +124,8 @@ internal abstract class SequentialJsonEnumerable<T>(Stream stream, WebClientConf
 /// <summary>
 /// Sequential json enumerable for jsonl
 /// </summary>
-internal class ApplicationJsonlEnumerable<T>(Stream stream, WebClientConfiguration configuration) : 
-    SequentialJsonEnumerable<T>(stream, configuration) 
+public class ApplicationJsonlEnumerable<T>(Stream stream, WebClientConfiguration configuration) :
+    SequentialJsonEnumerable<T>(stream, configuration)
     where T : struct, IJsonValue<T>
 {
     protected override byte Delimiter => 0x0A;
@@ -136,20 +136,20 @@ internal class ApplicationJsonlEnumerable<T>(Stream stream, WebClientConfigurati
 /// <summary>
 /// Sequential json enumerable for x-ndjson
 /// </summary>
-internal class ApplicationXNdjsonEnumerable<T>(Stream stream, WebClientConfiguration configuration) : ApplicationJsonlEnumerable<T>(stream, configuration)
+public class ApplicationXNdjsonEnumerable<T>(Stream stream, WebClientConfiguration configuration) : ApplicationJsonlEnumerable<T>(stream, configuration)
     where T : struct, IJsonValue<T>;
 
 /// <summary>
 /// Sequential json enumerable for x-jsonlines
 /// </summary>
-internal class ApplicationXJsonlinesEnumerable<T>(Stream stream, WebClientConfiguration configuration) : ApplicationJsonlEnumerable<T>(stream, configuration)
+public class ApplicationXJsonlinesEnumerable<T>(Stream stream, WebClientConfiguration configuration) : ApplicationJsonlEnumerable<T>(stream, configuration)
     where T : struct, IJsonValue<T>;
 
 /// <summary>
 /// Sequential json enumerable for json-seq
 /// </summary>
-internal class ApplicationJsonSeqEnumerable<T>(Stream stream, WebClientConfiguration configuration) : 
-    SequentialJsonEnumerable<T>(stream, configuration) 
+public class ApplicationJsonSeqEnumerable<T>(Stream stream, WebClientConfiguration configuration) :
+    SequentialJsonEnumerable<T>(stream, configuration)
     where T : struct, IJsonValue<T>
 {
     private const byte RecordSeparator = 0x1E;
@@ -173,7 +173,7 @@ internal class ApplicationJsonSeqEnumerable<T>(Stream stream, WebClientConfigura
 /// <summary>
 /// Sequential json enumerable for geo+json-seq
 /// </summary>
-internal class ApplicationGeoJsonSeqEnumerable<T>(Stream stream, WebClientConfiguration configuration) : ApplicationJsonSeqEnumerable<T>(stream, configuration)
+public class ApplicationGeoJsonSeqEnumerable<T>(Stream stream, WebClientConfiguration configuration) : ApplicationJsonSeqEnumerable<T>(stream, configuration)
     where T : struct, IJsonValue<T>;
 
 

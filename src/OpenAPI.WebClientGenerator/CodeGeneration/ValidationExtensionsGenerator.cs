@@ -15,7 +15,7 @@ namespace {{@namespace}};
 /// <summary>
 /// Extension methods for validation
 /// </summary>
-internal static class {{ClassName}}
+public static class {{ClassName}}
 {
     /// <summary>
     /// Add schema location to validation results
@@ -51,7 +51,7 @@ internal static class {{ClassName}}
     /// </summary>
     /// <param name="validationResults">Validation results to check</param>
     /// <returns>True if all validation results are valid</returns>
-    internal static bool IsValid(
+    public static bool IsValid(
         this ImmutableList<ValidationResult> validationResults) =>
             validationResults.All(result => result.Valid);
 

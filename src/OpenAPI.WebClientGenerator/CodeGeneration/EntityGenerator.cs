@@ -98,7 +98,7 @@ $$"""
         var entityClassName = GetEntityClassName(methodGenerator);
         return 
 $$"""
-internal {{entityClassName}} {{name}}({{GetMethodParameterList(methodGenerator)}})
+public {{entityClassName}} {{name}}({{GetMethodParameterList(methodGenerator)}})
 {{{(rootEntity ? 
 """
 
@@ -115,10 +115,19 @@ $$""""
     return new(requestBuilder, {{(rootEntity ? "_" : "")}}configuration);
 }
 
-internal partial class {{entityClassName}}(RequestBuilder requestBuilder, WebClientConfiguration configuration)
-{{{methodGenerator.Operations.AggregateToString(operation =>
+public partial class {{entityClassName}}
+{
+    private readonly RequestBuilder requestBuilder;
+    private readonly WebClientConfiguration configuration;
+
+    internal {{entityClassName}}(RequestBuilder requestBuilder, WebClientConfiguration configuration)
+    {
+        this.requestBuilder = requestBuilder;
+        this.configuration = configuration;
+    }
+{{methodGenerator.Operations.AggregateToString(operation =>
 $$"""
-    internal async Task<Result<{{GetResponseTypeName(operation)}}>> {{operation.OperationClassName}}Async({{
+    public async Task<Result<{{GetResponseTypeName(operation)}}>> {{operation.OperationClassName}}Async({{
         GetParameterArgumentExpressions(operation)
             .AggregateToString()
             .Indent(8)

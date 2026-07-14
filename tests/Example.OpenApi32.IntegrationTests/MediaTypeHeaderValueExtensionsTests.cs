@@ -1,9 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;
 using AwesomeAssertions;
 using Example.Foo;
 
 namespace Example.OpenApi32.IntegrationTests;
 
+[SuppressMessage("Usage", "AF0002:Access to internal generated member")]
 public class MediaTypeHeaderValueExtensionsTests
 {
     [Theory]

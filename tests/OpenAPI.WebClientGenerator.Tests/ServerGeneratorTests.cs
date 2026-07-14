@@ -52,20 +52,20 @@ public class ServerGeneratorTests(ITestOutputHelper testOutputHelper)
 
             namespace Example;
 
-            internal static class Servers
+            public static class Servers
             {
-                internal class Server(Uri baseUri)
+                public class Server(Uri baseUri)
                 {
                     /// <summary>
                     /// The base uri of the server.
                     /// </summary>
-                    internal Uri BaseUrl => baseUri;
+                    public Uri BaseUrl => baseUri;
                 }
 
                 /// <summary>
                 /// The production server.
                 /// </summary>
-                internal static readonly Server Production = new(new Uri("https://api.example.com", UriKind.RelativeOrAbsolute));
+                public static readonly Server Production = new(new Uri("https://api.example.com", UriKind.RelativeOrAbsolute));
             }
             #nullable restore
             """.ReplaceLineEndings("\n"));
@@ -118,20 +118,20 @@ public class ServerGeneratorTests(ITestOutputHelper testOutputHelper)
 
             namespace Example;
 
-            internal static class Servers
+            public static class Servers
             {
-                internal class Server(Uri baseUri)
+                public class Server(Uri baseUri)
                 {
                     /// <summary>
                     /// The base uri of the server.
                     /// </summary>
-                    internal Uri BaseUrl => baseUri;
+                    public Uri BaseUrl => baseUri;
                 }
 
                 /// <summary>
                 /// The Server0 server.
                 /// </summary>
-                internal static readonly Server Server0 = new(new Uri("https://api.example.com/v2", UriKind.RelativeOrAbsolute));
+                public static readonly Server Server0 = new(new Uri("https://api.example.com/v2", UriKind.RelativeOrAbsolute));
             }
             #nullable restore
             """.ReplaceLineEndings("\n"));
@@ -175,26 +175,26 @@ public class ServerGeneratorTests(ITestOutputHelper testOutputHelper)
 
             namespace Example;
 
-            internal static class Servers
+            public static class Servers
             {
-                internal class Server(Uri baseUri)
+                public class Server(Uri baseUri)
                 {
                     /// <summary>
                     /// The base uri of the server.
                     /// </summary>
-                    internal Uri BaseUrl => baseUri;
+                    public Uri BaseUrl => baseUri;
                 }
 
                 /// <summary>
                 /// The tenant server.
                 /// </summary>
-                internal static Server0 UseServer0(string tenant = "demo", string basePath = "v2") =>
+                public static Server0 UseServer0(string tenant = "demo", string basePath = "v2") =>
                     new(tenant, basePath);
 
                 /// <summary>
                 /// The tenant server.
                 /// </summary>
-                internal sealed class Server0(string tenant = "demo", string basePath = "v2") :
+                public sealed class Server0(string tenant = "demo", string basePath = "v2") :
                     Server(new Uri($"https://{tenant}.example.com/{basePath}", UriKind.RelativeOrAbsolute))
                 {
                 }
@@ -241,33 +241,33 @@ public class ServerGeneratorTests(ITestOutputHelper testOutputHelper)
 
             namespace Example;
 
-            internal static class Servers
+            public static class Servers
             {
-                internal class Server(Uri baseUri)
+                public class Server(Uri baseUri)
                 {
                     /// <summary>
                     /// The base uri of the server.
                     /// </summary>
-                    internal Uri BaseUrl => baseUri;
+                    public Uri BaseUrl => baseUri;
                 }
 
                 /// <summary>
                 /// The Server0 server.
                 /// </summary>
-                internal static Server0 UseServer0(Server0.Region region = Server0.Region.Us) =>
+                public static Server0 UseServer0(Server0.Region region = Server0.Region.Us) =>
                     new(region);
 
                 /// <summary>
                 /// The Server0 server.
                 /// </summary>
-                internal sealed class Server0(Server0.Region region = Server0.Region.Us) :
+                public sealed class Server0(Server0.Region region = Server0.Region.Us) :
                     Server(new Uri($"https://{RegionTranslation[region]}.example.com", UriKind.RelativeOrAbsolute))
                 {
                     private static readonly Dictionary<Region, string> RegionTranslation = [
                         [Us] = "us",
                         [Eu] = "eu"
                     ];
-                    internal enum Region
+                    public enum Region
                     {
                         Us,
                         Eu
@@ -322,17 +322,17 @@ public class ServerGeneratorTests(ITestOutputHelper testOutputHelper)
 
             namespace Example;
 
-            internal static class Servers
+            public static class Servers
             {
-                internal class Server(Uri baseUri)
+                public class Server(Uri baseUri)
                 {
                     /// <summary>
                     /// The base uri of the server.
                     /// </summary>
-                    internal Uri BaseUrl => baseUri;
+                    public Uri BaseUrl => baseUri;
                 }
             }
             #nullable restore
-            """);
+            """.ReplaceLineEndings("\n"));
     }
 }

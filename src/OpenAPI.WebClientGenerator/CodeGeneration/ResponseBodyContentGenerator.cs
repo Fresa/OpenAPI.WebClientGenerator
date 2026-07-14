@@ -63,9 +63,9 @@ $$"""
 /// <summary>
 /// Response for content {{ContentType}}
 /// </summary>
-internal sealed class {{ClassName}} : {{responseClassName}}, IAcceptContent
+public sealed class {{ClassName}} : {{responseClassName}}, IAcceptContent
 {
-    internal {{ClassName}}Enumerable<{{_typeDeclaration.FullyQualifiedDotnetTypeName()}}> Content { get; }
+    public {{ClassName}}Enumerable<{{_typeDeclaration.FullyQualifiedDotnetTypeName()}}> Content { get; }
 
     private {{ClassName}}(Stream stream, HttpResponseMessage response, WebClientConfiguration configuration) :
         base(response)
@@ -103,9 +103,9 @@ $$"""
 /// <summary>
 /// Response for content {{ContentType}}
 /// </summary>
-internal sealed class {{ClassName}} : {{responseClassName}}, IAcceptContent
+public sealed class {{ClassName}} : {{responseClassName}}, IAcceptContent
 {
-    internal {{_typeDeclaration.FullyQualifiedDotnetTypeName()}} Content { get; }
+    public {{_typeDeclaration.FullyQualifiedDotnetTypeName()}} Content { get; }
     
     private {{ClassName}}(JsonElement content, HttpResponseMessage response) :
         base(response)
