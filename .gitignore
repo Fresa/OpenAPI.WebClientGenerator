@@ -55,3 +55,6 @@ nunit-*.xml
 .idea/
 .claude/
 .NCrunch_OpenAPI.WebClientGenerator/
+
+# ApiCompat baseline assemblies
+!**/LastMajorVersionBinary/*.dll

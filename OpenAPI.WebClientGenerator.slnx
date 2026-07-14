@@ -3,6 +3,8 @@
     <File Path=".github/CODEOWNERS" />
     <File Path=".github/workflows/cd.yml" />
     <File Path=".github/workflows/lint-openapi.yml" />
+    <File Path=".gitignore" />
+    <File Path="tests/Directory.Build.props" />
   </Folder>
   <Project Path="src/OpenAPI.WebClientGenerator/OpenAPI.WebClientGenerator.csproj" />
   <Project Path="tests/Example.OpenApi/Example.OpenApi.csproj" />
