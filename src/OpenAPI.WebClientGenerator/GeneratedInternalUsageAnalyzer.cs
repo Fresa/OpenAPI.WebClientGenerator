@@ -1,22 +1,23 @@
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
-using Microsoft.CodeAnalysis.Operations;
 
 namespace OpenAPI.WebClientGenerator;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class GeneratedInternalUsageAnalyzer : DiagnosticAnalyzer
 {
+    private static readonly string SourceGeneratorName = typeof(WebClientGenerator).FullName!;
     private static readonly DiagnosticDescriptor Rule = new(
         id: "AF0002",
-        title: "Access to internal generated member",
+        title: "Access to internal generated symbol",
         messageFormat: "Cannot access internal generated {0} '{1}'",
         category: "Usage",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true,
-        description: "Internal types and members produced by the web client generator should not be access as they can introduce breaking changes without notice.");
+        description: $"Internal symbols produced by {SourceGeneratorName} should not be accessed as they can introduce breaking changes without notice.");
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = [Rule];
 
@@ -24,43 +25,55 @@ public sealed class GeneratedInternalUsageAnalyzer : DiagnosticAnalyzer
     {
         context.EnableConcurrentExecution();
 
-        // Ignore generated code
-        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
+        // Include analyze code that is identified as generated
+        context.ConfigureGeneratedCodeAnalysis(
+            GeneratedCodeAnalysisFlags.Analyze | GeneratedCodeAnalysisFlags.ReportDiagnostics);
 
-        context.RegisterOperationAction(
-            Analyze,
-            OperationKind.ObjectCreation,
-            OperationKind.Invocation,
-            OperationKind.FieldReference,
-            OperationKind.PropertyReference,
-            OperationKind.EventReference,
-            OperationKind.MethodReference,
-            OperationKind.TypeOf);
+        context.RegisterSyntaxNodeAction(AnalyzeSyntaxNode, 
+            SyntaxKind.IdentifierName,
+            SyntaxKind.GenericName);
+        context.RegisterSymbolAction(AnalyzeSymbol, 
+            SymbolKind.NamedType);
     }
 
-    private static void Analyze(OperationAnalysisContext context)
+    private static void AnalyzeSyntaxNode(SyntaxNodeAnalysisContext context)
     {
-        var symbol = context.Operation switch
+        if (IsFromSourceGenerator(context.Node.SyntaxTree))
         {
-            IObjectCreationOperation operation => operation.Constructor,
-            IInvocationOperation operation => operation.TargetMethod,
-            IFieldReferenceOperation operation => (ISymbol?)operation.Field,
-            IPropertyReferenceOperation operation => operation.Property,
-            IEventReferenceOperation operation => operation.Event,
-            IMethodReferenceOperation operation => operation.Method,
-            ITypeOfOperation operation => operation.TypeOperand,
-            _ => null,
-        };
+            return;
+        }
 
-        if (symbol is not null && IsGeneratedInternal(symbol))
+        var symbol = context.SemanticModel.GetSymbolInfo(context.Node, context.CancellationToken).Symbol;
+        if (symbol is not null && ReferencesGeneratedInternalSymbols(symbol))
         {
-            context.ReportDiagnostic(Diagnostic.Create(
-                Rule, 
-                context.Operation.Syntax.GetLocation(),
-                DescribeKind(symbol), 
-                symbol.ToDisplayString()));
+            context.ReportDiagnostic(
+                AccessToGeneratedInternalSymbol(symbol, 
+                    context.Node.GetLocation()));
         }
     }
+
+    private static void AnalyzeSymbol(SymbolAnalysisContext context)
+    {
+        var symbol = context.Symbol;
+        if (!ReferencesGeneratedInternalSymbols(symbol))
+        {
+            return;
+        }
+
+        foreach (var location in symbol.Locations.Where(location => 
+                     !IsFromSourceGenerator(location.SourceTree)))
+        {
+            context.ReportDiagnostic(
+                AccessToGeneratedInternalSymbol(symbol, location));
+        }
+    }
+
+    private static Diagnostic AccessToGeneratedInternalSymbol(ISymbol symbol, Location location) =>
+        Diagnostic.Create(
+            Rule,
+            location,
+            DescribeKind(symbol),
+            symbol.ToDisplayString());
 
     private static string DescribeKind(ISymbol symbol) =>
         symbol switch
@@ -74,12 +87,17 @@ public sealed class GeneratedInternalUsageAnalyzer : DiagnosticAnalyzer
             _ => "member",
         };
 
-    private static bool IsGeneratedInternal(ISymbol symbol)
+    private static bool ReferencesGeneratedInternalSymbols(ISymbol symbol)
     {
         for (var current = symbol; current is not null; current = current.ContainingType)
         {
-            if (current.DeclaredAccessibility == Accessibility.Internal && 
-                IsGeneratedFromWebClientGenerator(current))
+            if (current is
+                {
+                    DeclaredAccessibility: Accessibility.Internal,
+                    DeclaringSyntaxReferences.Length: > 0
+                } &&
+                current.DeclaringSyntaxReferences.Any(reference =>
+                    IsFromSourceGenerator(reference.SyntaxTree)))
             {
                 return true;
             }
@@ -88,9 +106,7 @@ public sealed class GeneratedInternalUsageAnalyzer : DiagnosticAnalyzer
         return false;
     }
 
-    private static bool IsGeneratedFromWebClientGenerator(ISymbol symbol) =>
-        symbol.DeclaringSyntaxReferences.Length > 0 &&
-        symbol.DeclaringSyntaxReferences.All(reference =>
-            reference.SyntaxTree.FilePath.Replace('\\', '/')
-                .Contains($"/{typeof(WebClientGenerator).FullName!}/"));
+    private static bool IsFromSourceGenerator(SyntaxTree? tree) =>
+        tree is not null &&
+        tree.FilePath.Replace('\\', '/').Contains($"/{SourceGeneratorName}/");
 }
