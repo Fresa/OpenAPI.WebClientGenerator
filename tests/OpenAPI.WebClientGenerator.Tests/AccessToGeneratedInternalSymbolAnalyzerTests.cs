@@ -12,7 +12,7 @@ using Xunit;
 
 namespace OpenAPI.WebClientGenerator.Tests;
 
-public class GeneratedInternalUsageAnalyzerTests
+public class AccessToGeneratedInternalSymbolAnalyzerTests
 {
     private CancellationToken Cancellation => TestContext.Current.CancellationToken;
 
@@ -166,7 +166,7 @@ public class GeneratedInternalUsageAnalyzerTests
             [MetadataReference.CreateFromFile(typeof(object).Assembly.Location)],
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
-        var analyzer = new OpenAPIWebClientGenerator::OpenAPI.WebClientGenerator.GeneratedInternalUsageAnalyzer();
+        var analyzer = new OpenAPIWebClientGenerator::OpenAPI.WebClientGenerator.AccessToGeneratedInternalSymbolAnalyzer();
 
         var diagnostics = await compilation
             .WithAnalyzers([analyzer])
