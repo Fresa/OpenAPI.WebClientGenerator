@@ -1,6 +1,7 @@
 ﻿using AwesomeAssertions;
 using Corvus.Json;
 using Example.Foo.Definitions;
+using Example.Foo.Parameters;
 using OpenAPI.IntegrationTestHelpers.Auth;
 using Put = Example.Foo.Foo.Foo1.Put;
 
@@ -14,7 +15,7 @@ public class UpdateFooTests(FooApplicationFactory app) : FooTestSpecification, I
         using var httpClient = app.CreateClient();
 
         var client = new Foo.Foo(httpClient);
-        var result = await client.Foo_(1)
+        var result = await client.Foo_(new FooId(1))
             .PutAsync(
                 security: new Put.SecurityRequirement.PetstoreAuth(OIDCAuthHttpHandler.GetJwt("update")),
                 content: new Put.Content.ApplicationJson(

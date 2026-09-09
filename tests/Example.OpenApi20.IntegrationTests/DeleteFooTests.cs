@@ -1,5 +1,6 @@
 ﻿using AwesomeAssertions;
 using Corvus.Json;
+using Example.Foo.Parameters;
 
 namespace Example.OpenApi20.IntegrationTests;
 
@@ -10,7 +11,7 @@ public class DeleteFooTests(FooApplicationFactory app) : FooTestSpecification, I
     {
         using var httpClient = app.CreateClient();
         var client = new Foo.Foo(httpClient);
-        var result = await client.Foo_(10)
+        var result = await client.Foo_(new FooId(10))
             .DeleteAsync(CancellationToken);
         result.IsSuccessful.Should().BeTrue();
         result.Response.Should().BeOfType<Foo.Foo.Foo1.Delete.Response.OK200.Empty>();
