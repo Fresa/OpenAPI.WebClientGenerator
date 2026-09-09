@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- https://learn.microsoft.com/dotnet/fundamentals/package-validation/diagnostic-ids -->
+<Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Example.Foo.Parameters.FooId.op_Implicit(Example.Foo.Parameters.FooId)~System.Int64</Target>
+    <Left>LastMajorVersionBinary/Example.OpenApi20.IntegrationTests.dll</Left>
+    <Right>obj/net10.0/Example.OpenApi20.IntegrationTests.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Example.Foo.Parameters.FooId.op_Implicit(System.Int64)~Example.Foo.Parameters.FooId</Target>
+    <Left>LastMajorVersionBinary/Example.OpenApi20.IntegrationTests.dll</Left>
+    <Right>obj/net10.0/Example.OpenApi20.IntegrationTests.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Example.OpenApi20.IntegrationTests.Parameters.FooId.op_Implicit(Example.OpenApi20.IntegrationTests.Parameters.FooId)~System.Int64</Target>
+    <Left>LastMajorVersionBinary/Example.OpenApi20.IntegrationTests.dll</Left>
+    <Right>obj/net10.0/Example.OpenApi20.IntegrationTests.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Example.OpenApi20.IntegrationTests.Parameters.FooId.op_Implicit(System.Int64)~Example.OpenApi20.IntegrationTests.Parameters.FooId</Target>
+    <Left>LastMajorVersionBinary/Example.OpenApi20.IntegrationTests.dll</Left>
+    <Right>obj/net10.0/Example.OpenApi20.IntegrationTests.dll</Right>
+  </Suppression>
+</Suppressions>

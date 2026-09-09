@@ -158,14 +158,16 @@ internal sealed class SchemaGenerator(
 
         var generatedCode = typeBuilder.GenerateCodeUsing(
             languageProvider,
-            context.CancellationToken,
-            typeDeclarationsToGenerate);
+            typeDeclarationsToGenerate,
+            context.CancellationToken);
         
         foreach (var codeFile in generatedCode)
         {
             context.CancellationToken.ThrowIfCancellationRequested();
             
-            var filePath = namespaceToPathConversion[codeFile.TypeDeclaration.DotnetNamespace()];
+            var filePath = namespaceToPathConversion[
+                codeFile.TypeDeclaration?.DotnetNamespace() ?? throw new InvalidOperationException(
+                    $"Code file {codeFile.FileName} does not have a namespace. This is an internal implementation error.")];
             var fileName = Path.Combine(filePath, codeFile.FileName);
 
             // Deduplicate nested schemas that might already have been generated
